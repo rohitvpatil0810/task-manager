@@ -3,6 +3,7 @@ const { checkPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const maxAge = 3 * 24 * 60 * 60;
 
+// login Manager
 module.exports.loginManager = async (req, res) => {
   let { email, password } = req.body;
   let sqlQuery = "SELECT * FROM manager WHERE email = ?";
@@ -21,7 +22,7 @@ module.exports.loginManager = async (req, res) => {
         error: "Manager is not registered.",
       });
     } else {
-      let id = result[0].id;
+      let id = result[0].managerId;
       let hashPassword = result[0].password;
       let auth = await checkPassword(password, hashPassword);
       if (auth) {
@@ -41,6 +42,15 @@ module.exports.loginManager = async (req, res) => {
   });
 };
 
+// get profile of admin
+module.exports.getManagerProfile = async (req, res) => {
+  const manager = req.manager;
+  delete manager.managerId;
+  delete manager.password;
+  res.status(200).json({ success: true, data: { manager } });
+};
+
+// logout Manager
 module.exports.logoutManager = async (req, res) => {
   res
     .clearCookie("jwt")
