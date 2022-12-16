@@ -102,6 +102,133 @@ module.exports.createNewAdmin = async (req, res) => {
   });
 };
 
+// creating new Manager
+module.exports.createNewManager = async (req, res) => {
+  let manager = req.body;
+  const check = checkUserData(manager);
+  if (!check.result) {
+    res.status(400).json({
+      success: false,
+      error: check.errors,
+    });
+    return;
+  }
+
+  manager.managerId = generateId();
+  const newPassword = await hashPassword(manager.password);
+  manager.password = newPassword;
+  let values = [
+    manager.managerId,
+    manager.name,
+    manager.email,
+    manager.mobile,
+    manager.password,
+  ];
+  let sqlQuery = "SELECT * FROM manager where email = ? OR mobile = ?";
+  db.query(sqlQuery, [manager.email, manager.mobile], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    }
+    if (result.length == 0) {
+      sqlQuery =
+        "INSERT INTO manager (managerId, name, email, mobile, password) VALUES ?";
+      db.query(sqlQuery, [[values]], (error, result) => {
+        if (error) {
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error.",
+          });
+          return;
+        } else {
+          res.status(200).json({
+            success: true,
+            data: "Manager created successfully.",
+          });
+        }
+      });
+    } else {
+      res.status(409).json({
+        success: false,
+        error:
+          "Manager is already present on system with this mobile number or email.",
+      });
+    }
+  });
+};
+
+// creating new Client
+module.exports.createNewClient = async (req, res) => {
+  let client = req.body;
+  const check = checkUserData(client);
+  if (!client.organization) {
+    check.result = false;
+    check.errors.organization = "Please enter organization name.";
+  } else {
+    if (client.organization.length < 3) {
+      check.result = false;
+      check.errors.organization =
+        "Organization name should contain atleast 3 characters.";
+    }
+  }
+  if (!check.result) {
+    res.status(400).json({
+      success: false,
+      error: check.errors,
+    });
+    return;
+  }
+
+  client.clientId = generateId();
+  const newPassword = await hashPassword(client.password);
+  client.password = newPassword;
+  let values = [
+    client.clientId,
+    client.name,
+    client.email,
+    client.mobile,
+    client.organization,
+    client.password,
+  ];
+  let sqlQuery = "SELECT * FROM client where email = ? OR mobile = ?";
+  db.query(sqlQuery, [client.email, client.mobile], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    }
+    if (result.length == 0) {
+      sqlQuery =
+        "INSERT INTO client (clientId, name, email, mobile, organization, password) VALUES ?";
+      db.query(sqlQuery, [[values]], (error, result) => {
+        if (error) {
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error.",
+          });
+          return;
+        } else {
+          res.status(200).json({
+            success: true,
+            data: "Client created successfully.",
+          });
+        }
+      });
+    } else {
+      res.status(409).json({
+        success: false,
+        error:
+          "Client is already present on system with this mobile number or email.",
+      });
+    }
+  });
+};
+
 module.exports.logoutAdmin = async (req, res) => {
   res
     .clearCookie("jwt")
