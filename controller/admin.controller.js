@@ -8,7 +8,7 @@ const maxAge = 3 * 24 * 60 * 60;
 // login Admin
 module.exports.loginAdmin = async (req, res) => {
   let { email, password } = req.body;
-  let sqlQuery = "SELECT * FROM admin where email = ?";
+  let sqlQuery = "SELECT * FROM admin WHERE email = ?";
   let value = [email];
   db.query(sqlQuery, [value], async (error, result) => {
     if (error) {
@@ -100,4 +100,11 @@ module.exports.createNewAdmin = async (req, res) => {
       });
     }
   });
+};
+
+module.exports.logoutAdmin = async (req, res) => {
+  res
+    .clearCookie("jwt")
+    .status(200)
+    .json({ success: true, data: "Logged out successfully." });
 };
