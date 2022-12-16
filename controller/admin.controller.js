@@ -44,6 +44,14 @@ module.exports.loginAdmin = async (req, res) => {
   });
 };
 
+// get profile of admin
+module.exports.getAdminProfile = async (req, res) => {
+  const admin = req.admin;
+  delete admin.id;
+  delete admin.password;
+  res.status(200).json({ success: true, data: { admin } });
+};
+
 // creating new Admin
 module.exports.createNewAdmin = async (req, res) => {
   let admin = req.body;
