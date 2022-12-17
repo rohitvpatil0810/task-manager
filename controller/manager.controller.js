@@ -1,7 +1,8 @@
 const { createToken } = require("../utility/createJWToken");
-const { checkPassword } = require("../utility/passwordManager");
+const { checkPassword, hashPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const { generateId } = require("../utility/idGenerator");
+const { checkUserData } = require("../utility/checkUserData");
 const maxAge = 3 * 24 * 60 * 60;
 
 // login Manager
@@ -110,6 +111,96 @@ module.exports.createNewDepartment = async (req, res) => {
       });
     }
   });
+};
+
+// Creating new Operator/Resource
+module.exports.createNewOperator = async (req, res) => {
+  let operator = req.body;
+  if (operator && !operator.departmentId) {
+    res.status(502).json({
+      success: false,
+      error: "Something went wrong. Please try again.",
+    });
+    return;
+  }
+  let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
+  if (operator && operator.departmentId) {
+    db.query(sqlQuery, [operator.departmentId], async (error, result) => {
+      if (error) {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error",
+        });
+        return;
+      }
+      if (result.length == 0) {
+        res.status(502).json({
+          success: false,
+          error: "Something went wrong. Please try again.",
+        });
+        return;
+      } else {
+        const check = checkUserData(operator);
+        if (!check.result) {
+          res.status(400).json({
+            success: false,
+            error: check.errors,
+          });
+          return;
+        }
+
+        operator.operatorId = generateId();
+        const newPassword = await hashPassword(operator.password);
+        operator.password = newPassword;
+        let values = [
+          operator.operatorId,
+          operator.name,
+          operator.email,
+          operator.mobile,
+          operator.password,
+          operator.departmentId,
+        ];
+        sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
+        db.query(
+          sqlQuery,
+          [operator.email, operator.mobile],
+          (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error.",
+              });
+              return;
+            }
+            if (result.length == 0) {
+              sqlQuery =
+                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error.",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Operator created successfully.",
+                  });
+                }
+              });
+            } else {
+              res.status(409).json({
+                success: false,
+                error:
+                  "Operator is already present on system with this mobile number or email.",
+              });
+            }
+          }
+        );
+      }
+    });
+  }
 };
 
 // logout Manager

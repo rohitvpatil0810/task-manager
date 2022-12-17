@@ -12,3 +12,6 @@ CLIENT SCHEMA -
 
 DEPARTMENT SCHEMA -
     CREATE TABLE department (departmentId VARCHAR(255) PRIMARY KEY, departmentName VARCHAR(255), managerId VARCHAR(255), FOREIGN KEY (managerId) REFERENCES manager(managerId));
+
+OPERATOR SCHEMA - 
+    CREATE TABLE operator (operatorId VARCHAR(255) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), mobile VARCHAR(255), password VARCHAR(255), departmentId VARCHAR(255), FOREIGN KEY (departmentId) REFERENCES department(departmentId));
