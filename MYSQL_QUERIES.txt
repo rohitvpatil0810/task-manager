@@ -9,3 +9,6 @@ MANAGER SCHEMA -
 
 CLIENT SCHEMA - 
     CREATE TABLE client (clientId VARCHAR(255) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), mobile VARCHAR(255), organization VARCHAR(255), password VARCHAR(255));
+
+DEPARTMENT SCHEMA -
+    CREATE TABLE department (departmentId VARCHAR(255) PRIMARY KEY, departmentName VARCHAR(255), managerId VARCHAR(255), FOREIGN KEY (managerId) REFERENCES manager(managerId));

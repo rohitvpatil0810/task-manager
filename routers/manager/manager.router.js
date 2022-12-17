@@ -3,6 +3,7 @@ const {
   loginManager,
   logoutManager,
   getManagerProfile,
+  createNewDepartment,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -10,6 +11,7 @@ const {
 
 const managerRouter = Router();
 
+managerRouter.post("/addDepartment", requireManagerAuth, createNewDepartment);
 managerRouter.get("/profile", requireManagerAuth, getManagerProfile);
 managerRouter.post("/login", loginManager);
 managerRouter.get("/logout", logoutManager);
