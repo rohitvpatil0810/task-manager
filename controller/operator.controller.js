@@ -61,6 +61,28 @@ module.exports.getOperatorProfile = async (req, res) => {
   });
 };
 
+module.exports.changeTaskStatus = async (req, res) => {
+  let status = "Completed";
+  let taskId = req.params.id;
+
+  let sqlQuery = "UPDATE task SET taskStatus = ? WHERE taskID = ?";
+
+  db.query(sqlQuery, [status, taskId], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({
+        success: true,
+        data: "status updated successfully.",
+      });
+    }
+  });
+};
+
 // logout Operator
 module.exports.logoutOperator = async (req, res) => {
   res
