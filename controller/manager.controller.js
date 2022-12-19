@@ -314,6 +314,7 @@ module.exports.completedTask = async (req, res) => {
     }
   });
 };
+
 // logout Manager
 module.exports.logoutManager = async (req, res) => {
   res
