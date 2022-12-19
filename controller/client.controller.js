@@ -1,6 +1,8 @@
 const db = require("../database/db");
 const { createToken } = require("../utility/createJWToken");
+const { generateId } = require("../utility/idGenerator");
 const { checkPassword } = require("../utility/passwordManager");
+const moment = require("moment");
 const maxAge = 3 * 24 * 60 * 60;
 
 // client login
@@ -56,4 +58,39 @@ module.exports.logoutClient = async (req, res) => {
     .clearCookie("jwt")
     .status(200)
     .json({ success: true, data: "Logged out successfully." });
+};
+
+module.exports.createTask = async (req, res) => {
+  let task = req.body;
+  task.taskID = generateId();
+  task.taskCategory = "Scheduled";
+  let values = [
+    task.taskID,
+    task.clientId,
+    task.ProjectName,
+    task.taskName,
+    task.taskDescription,
+    task.openDate,
+    task.closeDate,
+    task.clientNote,
+    task.taskCategory,
+  ];
+
+  let sqlQuery =
+    "INSERT INTO task (taskID , clientId , ProjectName , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
+
+  db.query(sqlQuery, [[values]], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({
+        success: true,
+        data: "task created successfully.",
+      });
+    }
+  });
 };

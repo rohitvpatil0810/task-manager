@@ -3,6 +3,7 @@ const { checkPassword, hashPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const { generateId } = require("../utility/idGenerator");
 const { checkUserData } = require("../utility/checkUserData");
+const { response } = require("express");
 const maxAge = 3 * 24 * 60 * 60;
 
 // login Manager
@@ -203,6 +204,116 @@ module.exports.createNewOperator = async (req, res) => {
   }
 };
 
+module.exports.assignTask = async (req, res) => {
+  let taskId = req.params.id;
+  let manager = req.body;
+  let sqlQuery = "SELECT * FROM task WHERE taskID = ?";
+  db.query(sqlQuery, [taskId], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    }
+
+    if (result.length != 0) {
+      sqlQuery =
+        "UPDATE task SET operatorId = ? , managerId = ? , managerNote = ? , priority = ? , AssignationStatus = ? , taskStatus = ? WHERE taskID = ?";
+
+      db.query(
+        sqlQuery,
+        [
+          manager.operatorId,
+          manager.managerId,
+          manager.managerNote,
+          manager.priority,
+          manager.AssignationStatus,
+          manager.taskStatus,
+          taskId,
+        ],
+        (error, result) => {
+          if (error) {
+            res.status(502).json({
+              success: false,
+              error: "Internal Server Error.",
+            });
+            return;
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "task accepted and updated successfully.",
+            });
+          }
+        }
+      );
+    }
+  });
+};
+
+module.exports.assignedTask = (req, res) => {
+  let sqlQuery = "SELECT * FROM task WHERE AssignationStatus = ?";
+  let status = "Assigned";
+  db.query(sqlQuery, [status], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({ result });
+    }
+  });
+};
+
+module.exports.notAssignedTask = async (req, res) => {
+  let sqlQuery = "SELECT * FROM task WHERE AssignationStatus = ?";
+  let status = "Pending";
+  db.query(sqlQuery, [status], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({ result });
+    }
+  });
+};
+
+module.exports.inProgressTask = async (req, res) => {
+  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ?";
+  let status = "inProgress";
+  db.query(sqlQuery, [status], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({ result });
+    }
+  });
+};
+
+module.exports.completedTask = async (req, res) => {
+  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ?";
+  let status = "Completed";
+  db.query(sqlQuery, [status], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({ result });
+    }
+  });
+};
 // logout Manager
 module.exports.logoutManager = async (req, res) => {
   res
