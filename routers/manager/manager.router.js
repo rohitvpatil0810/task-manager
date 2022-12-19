@@ -5,6 +5,7 @@ const {
   getManagerProfile,
   createNewDepartment,
   createNewOperator,
+  acceptTask,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -17,5 +18,6 @@ managerRouter.post("/addOperator", requireManagerAuth, createNewOperator);
 managerRouter.get("/profile", requireManagerAuth, getManagerProfile);
 managerRouter.post("/login", loginManager);
 managerRouter.get("/logout", logoutManager);
+managerRouter.post("/acceptTask/:id", acceptTask);
 
 module.exports = managerRouter;

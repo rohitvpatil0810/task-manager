@@ -3,6 +3,7 @@ const { checkPassword, hashPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const { generateId } = require("../utility/idGenerator");
 const { checkUserData } = require("../utility/checkUserData");
+const { response } = require("express");
 const maxAge = 3 * 24 * 60 * 60;
 
 // login Manager
@@ -201,6 +202,59 @@ module.exports.createNewOperator = async (req, res) => {
       }
     });
   }
+};
+
+module.exports.acceptTask = async (req, res) => {
+  let taskId = req.params.id;
+  let manager = req.body;
+  let sqlQuery = "SELECT * FROM task WHERE taskID = ?";
+  db.query(sqlQuery, [taskId], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    }
+
+    // let values = [
+    //   manager.operatorId,
+    //   manager.managerId,
+    //   manager.managerNote,
+    //   manager.priority,
+    //   manager.AssignationStatus,
+    // ];
+    if (result.length != 0) {
+      sqlQuery =
+        "UPDATE task SET operatorId = ? , managerId = ? , managerNote = ? , priority = ? , AssignationStatus = ? WHERE taskID = ?";
+
+      db.query(
+        sqlQuery,
+        [
+          manager.operatorId,
+          manager.managerId,
+          manager.managerNote,
+          manager.priority,
+          manager.AssignationStatus,
+          taskId,
+        ],
+        (error, result) => {
+          if (error) {
+            res.status(502).json({
+              success: false,
+              error: "Internal Server Error.",
+            });
+            return;
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "task accepted and updated successfully.",
+            });
+          }
+        }
+      );
+    }
+  });
 };
 
 // logout Manager
