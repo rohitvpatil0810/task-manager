@@ -83,6 +83,24 @@ module.exports.changeTaskStatus = async (req, res) => {
   });
 };
 
+module.exports.taskByOperatorId = async (req, res) => {
+  let operatorId = req.operator.operatorId;
+  sqlQuery = "SELECT * FROM task WHERE operatorId = ?";
+  db.query(sqlQuery, [operatorId], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: true,
+        error: "Internal Server Error",
+      });
+      return;
+    } else {
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
+    }
+  });
+};
+
 // logout Operator
 module.exports.logoutOperator = async (req, res) => {
   res

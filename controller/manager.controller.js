@@ -207,6 +207,8 @@ module.exports.createNewOperator = async (req, res) => {
 module.exports.assignTask = async (req, res) => {
   let taskId = req.params.id;
   let manager = req.body;
+  let managerId = req.manager.managerId;
+
   let sqlQuery = "SELECT * FROM task WHERE taskID = ?";
   db.query(sqlQuery, [taskId], async (error, result) => {
     if (error) {
@@ -225,7 +227,7 @@ module.exports.assignTask = async (req, res) => {
         sqlQuery,
         [
           manager.operatorId,
-          manager.managerId,
+          managerId,
           manager.managerNote,
           manager.priority,
           manager.AssignationStatus,
@@ -262,7 +264,9 @@ module.exports.assignedTask = (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({ result });
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
     }
   });
 };
@@ -278,7 +282,9 @@ module.exports.notAssignedTask = async (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({ result });
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
     }
   });
 };
@@ -294,7 +300,9 @@ module.exports.inProgressTask = async (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({ result });
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
     }
   });
 };
@@ -310,7 +318,9 @@ module.exports.completedTask = async (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({ result });
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
     }
   });
 };
