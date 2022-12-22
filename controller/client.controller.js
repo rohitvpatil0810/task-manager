@@ -3,6 +3,7 @@ const { createToken } = require("../utility/createJWToken");
 const { generateId } = require("../utility/idGenerator");
 const { checkPassword } = require("../utility/passwordManager");
 const moment = require("moment");
+const e = require("express");
 const maxAge = 3 * 24 * 60 * 60;
 
 // client login
@@ -88,9 +89,23 @@ module.exports.createTask = async (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({
-        success: true,
-        data: "Task created successfully.",
+      let taskTimelineId = generateId();
+      values = [taskTimelineId, result.taskId, task.openDate, task.closeDate];
+      sqlQuery =
+        "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
+      db.query(sqlQuery, [[values]], (error, result) => {
+        if (error) {
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error.",
+          });
+          return;
+        } else {
+          res.status(200).json({
+            success: true,
+            data: "Task created successfully.",
+          });
+        }
       });
     }
   });
@@ -144,11 +159,23 @@ module.exports.clientApproval = async (req, res) => {
               });
               return;
             } else {
-              res.status(200).json({
-                success: true,
-                data: "Task Approved and Closed Successfully",
+              sqlQuery =
+                "UPDATE taskTimeline SET clientApprovalDate = CURRDATE(), actualCloseDate = CURRDATE() WHERE taskId = ?";
+              db.query(sqlQuery, [id], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Task Approved and Closed Successfully",
+                  });
+                  return;
+                }
               });
-              return;
             }
           }
         );
@@ -191,11 +218,23 @@ module.exports.rejectTaskByClient = async (req, res) => {
               });
               return;
             } else {
-              res.status(200).json({
-                success: true,
-                data: "Task rejected by client.",
+              sqlQuery =
+                "UPDATE taskTimeline SET clientRejection = CURRDATE() WHERE taskId = ?";
+              db.query(sqlQuery, [id], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Task rejected by client.",
+                  });
+                  return;
+                }
               });
-              return;
             }
           }
         );
