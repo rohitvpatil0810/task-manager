@@ -1,5 +1,4 @@
 APPROVAL
-manager - approval by manager when taskStatus complete with node addition.
 client - aproval by client when managerApproval is approved with note additon.
 
 REJECTION
