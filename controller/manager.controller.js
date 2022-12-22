@@ -282,7 +282,7 @@ module.exports.assignTask = async (req, res) => {
             return;
           } else {
             sqlQuery =
-              "UPDATE taskTimeline SET assignationDate = CURRDATE() WHERE taskId = ?";
+              "UPDATE taskTimeline SET assignationDate = CURRENT_DATE WHERE taskId = ?";
             db.query(sqlQuery, [taskId], (error, result) => {
               if (error) {
                 res.status(502).json({
@@ -414,7 +414,7 @@ module.exports.approveTask = async (req, res) => {
               return;
             } else {
               sqlQuery =
-                "UPDATE taskTimeline SET managerApprovalDate = CURRDATE() WHERE taskId = ?";
+                "UPDATE taskTimeline SET managerApprovalDate = CURRENT_DATE WHERE taskId = ?";
               db.query(sqlQuery, [id], (error, result) => {
                 if (error) {
                   res.status(502).json({
@@ -475,7 +475,7 @@ module.exports.rejectTask = async (req, res) => {
               return;
             } else {
               sqlQuery =
-                "UPDATE taskTimeline SET managerRejectionDate = CURRDATE(), lastReassignation = CURRDATE() WHERE taskId = ?";
+                "UPDATE taskTimeline SET managerRejectionDate = CURRENT_DATE, lastReassignation = CURRENT_DATE WHERE taskId = ?";
               db.query(sqlQuery, [id], (error, result) => {
                 if (error) {
                   res.status(502).json({
