@@ -162,3 +162,50 @@ module.exports.clientApproval = async (req, res) => {
     }
   });
 };
+
+// Reject task by client
+module.exports.rejectTaskByClient = async (req, res) => {
+  let id = req.params.id;
+  let noteByClient = req.body.Note;
+
+  let sqlQuery = "SELECT * FROM task WHERE taskID = ? AND managerApproval = ?";
+  db.query(sqlQuery, [id, "Accepted"], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error",
+      });
+      return;
+    } else {
+      if (result.length != 0) {
+        sqlQuery =
+          "UPDATE task SET clientApproval = ? , clientNote = ? , taskStatus = ?, managerApproval = ? WHERE taskID = ? AND managerApproval = ? ";
+        db.query(
+          sqlQuery,
+          ["Rejected", noteByClient, "inProgress", "Pending", id, "Accepted"],
+          async (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error",
+              });
+              return;
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Task rejected by client.",
+              });
+              return;
+            }
+          }
+        );
+      } else {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error",
+        });
+        return;
+      }
+    }
+  });
+};
