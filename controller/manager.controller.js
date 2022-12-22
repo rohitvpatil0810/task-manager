@@ -254,9 +254,11 @@ module.exports.assignTask = async (req, res) => {
 };
 
 module.exports.assignedTask = (req, res) => {
-  let sqlQuery = "SELECT * FROM task WHERE AssignationStatus = ?";
+  let id = req.manager.managerId;
+  let sqlQuery =
+    "SELECT * FROM task WHERE AssignationStatus = ? AND managerId = ?";
   let status = "Assigned";
-  db.query(sqlQuery, [status], (error, result) => {
+  db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
@@ -290,9 +292,10 @@ module.exports.notAssignedTask = async (req, res) => {
 };
 
 module.exports.inProgressTask = async (req, res) => {
-  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ?";
+  let id = req.manager.managerId;
+  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ? AND managerId = ?";
   let status = "inProgress";
-  db.query(sqlQuery, [status], (error, result) => {
+  db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
@@ -308,9 +311,10 @@ module.exports.inProgressTask = async (req, res) => {
 };
 
 module.exports.completedTask = async (req, res) => {
-  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ?";
+  let id = req.manager.managerId;
+  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ? AND managerId = ?";
   let status = "Completed";
-  db.query(sqlQuery, [status], (error, result) => {
+  db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
