@@ -242,6 +242,26 @@ module.exports.getOperatorsByDepartment = async (req, res) => {
   });
 };
 
+// get taskTimeline for a certain task id
+module.exports.getTaskTimelineByTaskId = async (req, res) => {
+  let taskId = req.params.taskId;
+  let sqlQuery = "SELECT * FROM taskTimeline WHERE taskId = ?";
+  db.query(sqlQuery, [taskId], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res.status(200).json({
+        success: true,
+        data: { timeline: result[0] },
+      });
+    }
+  });
+};
+
 // assigning task to a resource
 module.exports.assignTask = async (req, res) => {
   let taskId = req.params.id;

@@ -7,6 +7,7 @@ const {
   trackYourTask,
   clientApproval,
   rejectTaskByClient,
+  getTaskTimelineByTaskId,
 } = require("../../controller/client.controller");
 const { requireClientAuth } = require("../../middleware/clientAuth.middleware");
 
@@ -17,6 +18,11 @@ clientRouter.post("/login", loginClient);
 clientRouter.get("/logout", logoutClient);
 clientRouter.post("/createTask", requireClientAuth, createTask);
 clientRouter.get("/trackYourTask", requireClientAuth, trackYourTask);
+clientRouter.get(
+  "/getTimeline/:taskId",
+  requireClientAuth,
+  getTaskTimelineByTaskId
+);
 clientRouter.post("/approveTask/:id", requireClientAuth, clientApproval);
 clientRouter.post("/rejectTask/:id", requireClientAuth, rejectTaskByClient);
 

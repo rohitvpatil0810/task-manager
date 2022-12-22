@@ -14,6 +14,7 @@ const {
   getDepartments,
   getOperatorsByDepartment,
   rejectTask,
+  getTaskTimelineByTaskId,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -38,5 +39,10 @@ managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
 managerRouter.get("/completedTask", requireManagerAuth, completedTask);
+managerRouter.get(
+  "/getTimeline/:taskId",
+  requireManagerAuth,
+  getTaskTimelineByTaskId
+);
 managerRouter.post("/approveTask/:id", requireManagerAuth, approveTask);
 module.exports = managerRouter;
