@@ -75,9 +75,23 @@ module.exports.changeTaskStatus = async (req, res) => {
       });
       return;
     } else {
-      res.status(200).json({
-        success: true,
-        data: "status updated successfully.",
+      sqlQuery =
+        "UPDATE taskTimeline SET completionDate = CURRENT_DATE WHERE taskId = ?";
+      db.query(sqlQuery, [taskId], (error, result) => {
+        if (error) {
+          console.log(error);
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error",
+          });
+          return;
+        } else {
+          res.status(200).json({
+            success: true,
+            data: "status updated successfully.",
+          });
+          return;
+        }
       });
     }
   });

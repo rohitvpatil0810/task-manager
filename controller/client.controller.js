@@ -90,7 +90,7 @@ module.exports.createTask = async (req, res) => {
       return;
     } else {
       let taskTimelineId = generateId();
-      values = [taskTimelineId, result.taskId, task.openDate, task.closeDate];
+      values = [taskTimelineId, task.taskID, task.openDate, task.closeDate];
       sqlQuery =
         "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
       db.query(sqlQuery, [[values]], (error, result) => {
