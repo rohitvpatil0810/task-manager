@@ -13,6 +13,7 @@ const {
   approveTask,
   getDepartments,
   getOperatorsByDepartment,
+  rejectTask,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -31,6 +32,7 @@ managerRouter.get(
   requireManagerAuth,
   getOperatorsByDepartment
 );
+managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
 managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);

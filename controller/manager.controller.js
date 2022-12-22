@@ -411,7 +411,56 @@ module.exports.approveTask = async (req, res) => {
       } else {
         res.status(502).json({
           success: false,
-          error: "Internal Server Error",
+          error: "Current Task is not completed by operator.",
+        });
+        return;
+      }
+    }
+  });
+};
+
+// Reject a task
+module.exports.rejectTask = async (req, res) => {
+  let id = req.params.taskId;
+  let noteByManager = req.body.Note;
+  let sqlQuery = "SELECT * FROM task WHERE taskID = ? AND taskStatus = ?";
+
+  db.query(sqlQuery, [id, "Completed"], async (error, result) => {
+    if (error) {
+      console.log(error);
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error",
+      });
+      return;
+    } else {
+      if (result.length != 0) {
+        sqlQuery =
+          "UPDATE task SET managerApproval = ? , managerNote = ?, taskStatus = ? WHERE taskID = ? AND taskStatus = ?";
+        db.query(
+          sqlQuery,
+          ["Rejected", noteByManager, "inProgress", id, "Completed"],
+          async (error, result) => {
+            if (error) {
+              console.log(error);
+              res.status(502).json({
+                success: true,
+                error: "Internal Server Error",
+              });
+              return;
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Task rejected.",
+              });
+              return;
+            }
+          }
+        );
+      } else {
+        res.status(502).json({
+          success: false,
+          error: "Current Task is not completed by operator.",
         });
         return;
       }
