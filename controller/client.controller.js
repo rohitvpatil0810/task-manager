@@ -62,11 +62,12 @@ module.exports.logoutClient = async (req, res) => {
 
 module.exports.createTask = async (req, res) => {
   let task = req.body;
+  let clientId = req.client.clientId;
   task.taskID = generateId();
   task.taskCategory = "Scheduled";
   let values = [
     task.taskID,
-    task.clientId,
+    clientId,
     task.ProjectName,
     task.taskName,
     task.taskDescription,
@@ -89,7 +90,7 @@ module.exports.createTask = async (req, res) => {
     } else {
       res.status(200).json({
         success: true,
-        data: "task created successfully.",
+        data: "Task created successfully.",
       });
     }
   });
