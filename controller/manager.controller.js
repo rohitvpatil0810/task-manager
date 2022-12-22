@@ -325,6 +325,52 @@ module.exports.completedTask = async (req, res) => {
   });
 };
 
+module.exports.approveTask = async (req, res) => {
+  let id = req.params.id;
+  let noteByManager = req.body.Note;
+  let sqlQuery = "SELECT * FROM task WHERE taskID = ? AND taskStatus = ?";
+
+  db.query(sqlQuery, [id, "Completed"], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error",
+      });
+      return;
+    } else {
+      if (result.length != 0) {
+        sqlQuery =
+          "UPDATE task SET managerApproval = ? , managerNote = ? WHERE taskID = ? AND taskStatus = ?";
+        db.query(
+          sqlQuery,
+          ["Accepted", noteByManager, id, "Completed"],
+          async (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: true,
+                error: "Internal Server Error",
+              });
+              return;
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Task Approved Successfully",
+              });
+              return;
+            }
+          }
+        );
+      } else {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error",
+        });
+        return;
+      }
+    }
+  });
+};
+
 // logout Manager
 module.exports.logoutManager = async (req, res) => {
   res
