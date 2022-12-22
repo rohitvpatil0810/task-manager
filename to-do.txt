@@ -1,6 +1,3 @@
-APPROVAL
-client - aproval by client when managerApproval is approved with note additon.
-
 REJECTION
 manager - manager reject and reassign to same operator & also make task status inProgress with manager Note.
 client  -  client Reject and reassign to same operator & also make task status inProgress with client Note.
