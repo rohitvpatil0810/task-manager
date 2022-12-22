@@ -4,6 +4,7 @@ const {
   logoutClient,
   getClientProfile,
   createTask,
+  trackYourTask,
 } = require("../../controller/client.controller");
 const { requireClientAuth } = require("../../middleware/clientAuth.middleware");
 
@@ -13,5 +14,6 @@ clientRouter.get("/profile", requireClientAuth, getClientProfile);
 clientRouter.post("/login", loginClient);
 clientRouter.get("/logout", logoutClient);
 clientRouter.post("/createTask", requireClientAuth, createTask);
+clientRouter.get("/trackYourTask", requireClientAuth, trackYourTask);
 
 module.exports = clientRouter;

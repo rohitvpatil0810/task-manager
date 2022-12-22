@@ -94,3 +94,24 @@ module.exports.createTask = async (req, res) => {
     }
   });
 };
+
+module.exports.trackYourTask = async (req, res) => {
+  let id = req.client.clientId;
+  let sqlQuery = "SELECT * FROM task WHERE clientId = ?";
+
+  db.query(sqlQuery, [id], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error",
+      });
+      return;
+    } else {
+      res.status(200).json({
+        success: true,
+        data: "Data Fetched Successfully",
+        result,
+      });
+    }
+  });
+};
