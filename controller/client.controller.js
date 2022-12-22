@@ -219,7 +219,7 @@ module.exports.rejectTaskByClient = async (req, res) => {
               return;
             } else {
               sqlQuery =
-                "UPDATE taskTimeline SET clientRejection = CURRDATE() WHERE taskId = ?";
+                "UPDATE taskTimeline SET clientRejection = CURRDATE(), lastReassignation = CURRDATE() WHERE taskId = ?";
               db.query(sqlQuery, [id], (error, result) => {
                 if (error) {
                   res.status(502).json({
