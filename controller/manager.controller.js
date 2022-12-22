@@ -204,6 +204,25 @@ module.exports.createNewOperator = async (req, res) => {
   }
 };
 
+// Fetch list of available departments
+module.exports.getDepartments = async (req, res) => {
+  let sqlQuery = "SELECT * FROM department";
+  db.query(sqlQuery, (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        erro: "Internal Server Error.",
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: { departments: result },
+    });
+  });
+};
+
+// assigning task to a resource
 module.exports.assignTask = async (req, res) => {
   let taskId = req.params.id;
   let manager = req.body;
@@ -244,11 +263,16 @@ module.exports.assignTask = async (req, res) => {
           } else {
             res.status(200).json({
               success: true,
-              data: "task accepted and updated successfully.",
+              data: "Task assigned and updated successfully.",
             });
           }
         }
       );
+    } else {
+      res.status(502).json({
+        status: false,
+        error: "Internal Server Error.",
+      });
     }
   });
 };

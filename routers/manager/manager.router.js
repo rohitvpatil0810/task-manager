@@ -11,6 +11,7 @@ const {
   inProgressTask,
   completedTask,
   approveTask,
+  getDepartments,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -23,6 +24,7 @@ managerRouter.post("/addOperator", requireManagerAuth, createNewOperator);
 managerRouter.get("/profile", requireManagerAuth, getManagerProfile);
 managerRouter.post("/login", loginManager);
 managerRouter.get("/logout", logoutManager);
+managerRouter.get("/getDepartments", requireManagerAuth, getDepartments);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
 managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
