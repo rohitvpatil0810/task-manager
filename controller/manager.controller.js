@@ -222,6 +222,26 @@ module.exports.getDepartments = async (req, res) => {
   });
 };
 
+// Fetch list of operators for a department
+module.exports.getOperatorsByDepartment = async (req, res) => {
+  let departmentId = req.params.departmentId;
+  console.log(departmentId);
+  sqlQuery = "SELECT * FROM operator WHERE departmentId = ?";
+  db.query(sqlQuery, [departmentId], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        data: "Internal Server Error.",
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: { operators: result },
+    });
+  });
+};
+
 // assigning task to a resource
 module.exports.assignTask = async (req, res) => {
   let taskId = req.params.id;
