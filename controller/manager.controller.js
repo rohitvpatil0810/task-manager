@@ -281,9 +281,22 @@ module.exports.assignTask = async (req, res) => {
             });
             return;
           } else {
-            res.status(200).json({
-              success: true,
-              data: "Task assigned and updated successfully.",
+            sqlQuery =
+              "UPDATE taskTimeline SET assignationDate = CURRDATE() WHERE taskId = ?";
+            db.query(sqlQuery, [taskId], (error, result) => {
+              if (error) {
+                res.status(502).json({
+                  success: false,
+                  error: "Internal Server Error",
+                });
+                return;
+              } else {
+                res.status(200).json({
+                  success: true,
+                  data: "Task assigned and updated successfully.",
+                });
+                return;
+              }
             });
           }
         }
@@ -400,11 +413,23 @@ module.exports.approveTask = async (req, res) => {
               });
               return;
             } else {
-              res.status(200).json({
-                success: true,
-                data: "Task Approved Successfully",
+              sqlQuery =
+                "UPDATE taskTimeline SET managerApprovalDate = CURRDATE() WHERE taskId = ?";
+              db.query(sqlQuery, [id], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Task Approved Successfully",
+                  });
+                  return;
+                }
               });
-              return;
             }
           }
         );
@@ -449,11 +474,23 @@ module.exports.rejectTask = async (req, res) => {
               });
               return;
             } else {
-              res.status(200).json({
-                success: true,
-                data: "Task rejected.",
+              sqlQuery =
+                "UPDATE taskTimeline SET managerRejectionDate = CURRDATE(), lastReassignation = CURRDATE() WHERE taskId = ?";
+              db.query(sqlQuery, [id], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Task rejected.",
+                  });
+                  return;
+                }
               });
-              return;
             }
           }
         );
