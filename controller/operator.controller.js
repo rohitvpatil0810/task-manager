@@ -61,6 +61,34 @@ module.exports.getOperatorProfile = async (req, res) => {
   });
 };
 
+// get Attachments of a task by taskId
+module.exports.getAttachmentsByTaskId = async (req, res) => {
+  let taskId = req.params.taskId;
+  let operatorId = req.operator.operatorId;
+  let sqlQuery =
+    "SELECT a.* FROM attachments a NATURAL JOIN task t WHERE a.taskId = ? AND t.taskId = ? AND t.operatorId = ?";
+  db.query(sqlQuery, [taskId, taskId, operatorId], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        data: "Internal Server Error.",
+      });
+    } else {
+      if (result.length == 0) {
+        res.status(404).json({
+          success: false,
+          error: "No attachments found.",
+        });
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
 // get taskTimeline for a certain task id
 module.exports.getTaskTimelineByTaskId = async (req, res) => {
   let taskId = req.params.taskId;

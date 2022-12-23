@@ -15,6 +15,7 @@ const {
   getOperatorsByDepartment,
   rejectTask,
   getTaskTimelineByTaskId,
+  getAttachmentsByTaskId,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -43,6 +44,11 @@ managerRouter.get(
   "/getTimeline/:taskId",
   requireManagerAuth,
   getTaskTimelineByTaskId
+);
+managerRouter.get(
+  "/getAttachments/:taskId",
+  requireManagerAuth,
+  getAttachmentsByTaskId
 );
 managerRouter.post("/approveTask/:id", requireManagerAuth, approveTask);
 module.exports = managerRouter;

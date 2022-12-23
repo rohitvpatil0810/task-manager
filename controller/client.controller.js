@@ -4,6 +4,7 @@ const { generateId } = require("../utility/idGenerator");
 const { checkPassword } = require("../utility/passwordManager");
 const moment = require("moment");
 const e = require("express");
+const { response } = require("express");
 const maxAge = 3 * 24 * 60 * 60;
 
 // client login
@@ -127,6 +128,82 @@ module.exports.getTaskTimelineByTaskId = async (req, res) => {
         success: true,
         data: { timeline: result[0] },
       });
+    }
+  });
+};
+
+// get Attachments of a task by taskId
+module.exports.getAttachmentsByTaskId = async (req, res) => {
+  let taskId = req.params.taskId;
+  let clientId = req.client.clientId;
+  let sqlQuery =
+    "SELECT a.* FROM attachments a NATURAL JOIN task t WHERE a.taskId = ? AND t.taskId = ? AND t.clientId = ?";
+  db.query(sqlQuery, [taskId, taskId, clientId], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        data: "Internal Server Error.",
+      });
+    } else {
+      if (result.length == 0) {
+        res.status(404).json({
+          success: false,
+          error: "No attachments found.",
+        });
+        return;
+      }
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+// attach documents links to a task by task Id
+module.exports.attachDocumentsByTaskId = async (req, res) => {
+  let taskId = req.params.taskId;
+  let clientId = req.client.clientId;
+  let { documentsList } = req.body;
+  let sqlQuery = "SELECT * FROM task WHERE taskId = ? AND clientId = ?";
+  db.query(sqlQuery, [taskId, clientId], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      if (result.length == 0) {
+        res.status(502).json({
+          success: false,
+          error: "Something went wrong. Please try again.",
+        });
+        return;
+      } else {
+        let values = [];
+        documentsList.forEach((document) => {
+          document.attachmentId = generateId();
+          document.taskId = taskId;
+          values.push(Object.values(document));
+        });
+        sqlQuery =
+          "INSERT INTO attachments (documentName, driveLink, attachmentId, taskId) VALUES ?";
+        db.query(sqlQuery, [values], (error, result) => {
+          if (error) {
+            res.status(502).json({
+              success: false,
+              error: "Internal Server Error.",
+            });
+            return;
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "Attachments attached Successfully.",
+            });
+          }
+        });
+      }
     }
   });
 };

@@ -6,6 +6,7 @@ const {
   changeTaskStatus,
   taskByOperatorId,
   getTaskTimelineByTaskId,
+  getAttachmentsByTaskId,
 } = require("../../controller/operator.controller");
 const {
   requireOperatorAuth,
@@ -21,6 +22,11 @@ operatorRouter.get(
   "/getTimeline/:taskId",
   requireOperatorAuth,
   getTaskTimelineByTaskId
+);
+operatorRouter.get(
+  "/getAttachments/:taskId",
+  requireOperatorAuth,
+  getAttachmentsByTaskId
 );
 operatorRouter.post(
   "/changeTaskStatus/:id",
