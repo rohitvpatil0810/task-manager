@@ -1,4 +1,1 @@
-task files
-    - Create Table
-    - Creation of files for tasks.
-    - Fetching doc links.
+done with all tasks.
