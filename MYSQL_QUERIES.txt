@@ -21,3 +21,6 @@ TASK SCHEMA -
 
 TASK TIMELINE SCHEMA - 
     CREATE TABLE IF NOT EXISTS taskTimeline (timelineId VARCHAR(255) PRIMARY KEY, taskId VARCHAR(255), openDate DATE, closeDate DATE, actualCloseDate DATE, managerApprovalDate DATE, clientApprovalDate DATE, managerRejectionDate DATE, clientRejection DATE, assignationDate DATE, completionDate DATE, lastReassignation DATE, FOREIGN KEY (taskId) REFERENCES task(taskId) );
+
+ATTACHMENTS SCHEMA - 
+    CREATE TABLE IF NOT EXISTS attachments (attachmentId VARCHAR(255) PRIMARY KEY, taskId VARCHAR(255), documentName VARCHAR(255), driveLink VARCHAR(255), FOREIGN KEY (taskId) REFERENCES task(taskId));

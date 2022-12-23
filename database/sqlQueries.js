@@ -19,6 +19,9 @@ let sqlQuery7 =
 
 let sqlQuery8 =
   "CREATE TABLE IF NOT EXISTS taskTimeline (timelineId VARCHAR(255) PRIMARY KEY, taskId VARCHAR(255), openDate DATE, closeDate DATE, actualCloseDate DATE, managerApprovalDate DATE, clientApprovalDate DATE, managerRejectionDate DATE, clientRejection DATE, assignationDate DATE, completionDate DATE, lastReassignation DATE, FOREIGN KEY (taskId) REFERENCES task(taskId) );";
+
+let sqlQuery9 =
+  "CREATE TABLE IF NOT EXISTS attachments (attachmentId VARCHAR(255) PRIMARY KEY, taskId VARCHAR(255), documentName VARCHAR(255), driveLink VARCHAR(255), FOREIGN KEY (taskId) REFERENCES task(taskId));";
 module.exports = [
   sqlQuery1,
   sqlQuery2,
@@ -28,4 +31,5 @@ module.exports = [
   sqlQuery6,
   sqlQuery7,
   sqlQuery8,
+  sqlQuery9,
 ];
