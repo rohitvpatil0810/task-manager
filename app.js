@@ -14,20 +14,4 @@ app.listen(port, () => {
   console.log("Server listening on port ", port);
 });
 
-// app.get("/", (req, res) => {
-//   let sqlQuery = "SELECT * FROM PROJECT";
-//   db.query(sqlQuery, (err, result) => {
-//     if (err) {
-//       res.status(200).json({
-//         success: false,
-//         error: err,
-//       });
-//     }
-//     res.status(200).json({
-//       success: true,
-//       data: result,
-//     });
-//   });
-// });
-
 app.use(router);
