@@ -222,6 +222,72 @@ module.exports.getDepartments = async (req, res) => {
   });
 };
 
+module.exports.getClients = async (req, res) => {
+  let sqlQuery = "SELECT * FROM client";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.createTask = async (req, res) => {
+  let task = req.body;
+  task.taskID = generateId();
+  task.taskCategory = "Scheduled";
+  let values = [
+    task.taskID,
+    task.clientId,
+    task.ProjectName,
+    task.taskName,
+    task.taskDescription,
+    task.openDate,
+    task.closeDate,
+    task.clientNote,
+    task.taskCategory,
+  ];
+
+  let sqlQuery =
+    "INSERT INTO task (taskID , clientId , ProjectName , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
+
+  db.query(sqlQuery, [[values]], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      let taskTimelineId = generateId();
+      values = [taskTimelineId, task.taskID, task.openDate, task.closeDate];
+      sqlQuery =
+        "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
+      db.query(sqlQuery, [[values]], (error, result) => {
+        if (error) {
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error.",
+          });
+          return;
+        } else {
+          res.status(200).json({
+            success: true,
+            data: "Task created successfully.",
+          });
+        }
+      });
+    }
+  });
+};
 // Fetch list of operators for a department
 module.exports.getOperatorsByDepartment = async (req, res) => {
   let departmentId = req.params.departmentId;

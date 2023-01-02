@@ -16,6 +16,8 @@ const {
   rejectTask,
   getTaskTimelineByTaskId,
   getAttachmentsByTaskId,
+  createTask,
+  getClients,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -36,6 +38,8 @@ managerRouter.get(
 );
 managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
+managerRouter.post("/createTask", createTask);
+managerRouter.get("/getClients", getClients);
 managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);

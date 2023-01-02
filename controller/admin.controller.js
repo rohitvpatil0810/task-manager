@@ -44,6 +44,42 @@ module.exports.loginAdmin = async (req, res) => {
   });
 };
 
+module.exports.getManagers = async (req, res) => {
+  let sqlQuery = "SELECT * FROM manager";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.getClients = async (req, res) => {
+  let sqlQuery = "SELECT * FROM client";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
 // get profile of admin
 module.exports.getAdminProfile = async (req, res) => {
   const admin = req.admin;
