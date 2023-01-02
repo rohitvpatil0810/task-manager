@@ -61,6 +61,129 @@ module.exports.getManagers = async (req, res) => {
     }
   });
 };
+module.exports.getDepartments = async (req, res) => {
+  let sqlQuery = "SELECT * FROM department";
+  db.query(sqlQuery, (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        erro: "Internal Server Error.",
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      data: { departments: result },
+    });
+  });
+};
+
+module.exports.getOperators = async (req, res) => {
+  let sqlQuery = "SELECT * FROM operator";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.createNewOperator = async (req, res) => {
+  let operator = req.body;
+  if (operator && !operator.departmentId) {
+    res.status(502).json({
+      success: false,
+      error: "Something went wrong. Please try again.",
+    });
+    return;
+  }
+  let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
+  if (operator && operator.departmentId) {
+    db.query(sqlQuery, [operator.departmentId], async (error, result) => {
+      if (error) {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error",
+        });
+        return;
+      }
+      if (result.length == 0) {
+        res.status(502).json({
+          success: false,
+          error: "Something went wrong. Please try again.",
+        });
+        return;
+      } else {
+        const check = checkUserData(operator);
+        if (!check.result) {
+          res.status(400).json({
+            success: false,
+            error: check.errors,
+          });
+          return;
+        }
+
+        operator.operatorId = generateId();
+        const newPassword = await hashPassword(operator.password);
+        operator.password = newPassword;
+        let values = [
+          operator.operatorId,
+          operator.name,
+          operator.email,
+          operator.mobile,
+          operator.password,
+          operator.departmentId,
+        ];
+        sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
+        db.query(
+          sqlQuery,
+          [operator.email, operator.mobile],
+          (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error.",
+              });
+              return;
+            }
+            if (result.length == 0) {
+              sqlQuery =
+                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error.",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Operator created successfully.",
+                  });
+                }
+              });
+            } else {
+              res.status(409).json({
+                success: false,
+                error:
+                  "Operator is already present on system with this mobile number or email.",
+              });
+            }
+          }
+        );
+      }
+    });
+  }
+};
 
 module.exports.getClients = async (req, res) => {
   let sqlQuery = "SELECT * FROM client";

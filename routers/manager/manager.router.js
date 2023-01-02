@@ -38,8 +38,8 @@ managerRouter.get(
 );
 managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
-managerRouter.post("/createTask", createTask);
-managerRouter.get("/getClients", getClients);
+managerRouter.post("/createTask", requireManagerAuth, createTask);
+managerRouter.get("/getClients", requireManagerAuth, getClients);
 managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
