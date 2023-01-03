@@ -12,9 +12,11 @@ module.exports.loginAdmin = async (req, res) => {
   let value = [email];
   db.query(sqlQuery, [value], async (error, result) => {
     if (error) {
+      console.log(error);
       res.status(502).json({
         success: false,
-        error: "Internal Server Error.",
+        message: "Internal Server Error.",
+        log: error,
       });
       return;
     }
