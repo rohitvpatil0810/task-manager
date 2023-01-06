@@ -4,6 +4,7 @@ const adminRouter = require("./admin/admin.router");
 const clientRouter = require("./client/client.router");
 const managerRouter = require("./manager/manager.router");
 const operatorRouter = require("./operator/operator.router");
+const jwt = require("jsonwebtoken");
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use("/operator", operatorRouter);
 
 router.post("/getAuth", (req, res) => {
   let { token, userType } = req.body;
+  token = token.slice(4, token.indexOf(";"));
   if (token) {
     jwt.verify(token, process.env.SECRET_KEY, async (error, decodedToken) => {
       if (error) {
@@ -23,16 +25,19 @@ router.post("/getAuth", (req, res) => {
         });
       } else {
         let sqlQuery = "";
+        let field = "";
         if (userType == "admin") {
-          sqlQuery = "SELECT * FROM ? WHERE Id = ?";
+          sqlQuery = "SELECT * FROM " + userType + " WHERE id = ?";
         } else {
-          sqlQuery = `SELECT * FROM ? WHERE ${userType}Id = ?`;
+          sqlQuery =
+            "SELECT * FROM " + userType + " WHERE " + userType + "Id = ?";
         }
-        db.query(sqlQuery, [userType, decodedToken.id], (error, result) => {
+        db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({
               success: false,
-              error: "Internal Server Error.",
+              log: "Internal Server Error.",
+              error,
             });
             return;
           }
