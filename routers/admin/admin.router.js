@@ -27,5 +27,4 @@ adminRouter.post("/addClient", requireAdminAuth, createNewClient);
 adminRouter.get("/profile", requireAdminAuth, getAdminProfile);
 adminRouter.post("/login", loginAdmin);
 adminRouter.get("/logout", logoutAdmin);
-
 module.exports = adminRouter;
