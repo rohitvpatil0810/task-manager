@@ -18,6 +18,7 @@ const {
   getAttachmentsByTaskId,
   createTask,
   getClients,
+  attachDocumentsByTaskId,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -53,6 +54,12 @@ managerRouter.get(
   "/getAttachments/:taskId",
   requireManagerAuth,
   getAttachmentsByTaskId
+);
+
+managerRouter.post(
+  "/attachFiles/:taskId",
+  requireManagerAuth,
+  attachDocumentsByTaskId
 );
 managerRouter.post("/approveTask/:id", requireManagerAuth, approveTask);
 module.exports = managerRouter;
