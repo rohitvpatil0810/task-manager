@@ -19,6 +19,7 @@ const {
   createTask,
   getClients,
   attachDocumentsByTaskId,
+  getTasks,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -41,6 +42,7 @@ managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
 managerRouter.post("/createTask", requireManagerAuth, createTask);
 managerRouter.get("/getClients", requireManagerAuth, getClients);
+managerRouter.get("/getTasks", requireManagerAuth, getTasks);
 managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
