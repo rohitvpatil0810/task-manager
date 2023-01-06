@@ -444,6 +444,24 @@ module.exports.assignedTask = (req, res) => {
   });
 };
 
+module.exports.getTasks = (req, res) => {
+  let id = req.manager.managerId;
+  let sqlQuery = "SELECT * FROM task WHERE managerId = ?";
+  db.query(sqlQuery, [id], (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      res
+        .status(200)
+        .json({ success: true, data: "Data Successfully Fetched", result });
+    }
+  });
+};
+
 module.exports.notAssignedTask = async (req, res) => {
   let sqlQuery = "SELECT * FROM task WHERE AssignationStatus = ?";
   let status = "Pending";
