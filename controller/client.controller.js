@@ -374,9 +374,9 @@ module.exports.getOperatorByOperatorId = async (req, res) => {
 
 // get manager by manager Id
 module.exports.getManagerByManagerId = async (req, res) => {
-  let operatorId = req.params.managerId;
+  let managerId = req.params.managerId;
   let sqlQuery = "SELECT * FROM manager where managerId = ?";
-  db.query(sqlQuery, [operatorId], (error, result) => {
+  db.query(sqlQuery, [managerId], (error, result) => {
     if (error) {
       console.log(error);
       res.send(502).json({

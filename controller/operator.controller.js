@@ -173,9 +173,9 @@ module.exports.logoutOperator = async (req, res) => {
 
 // get manager by manager Id
 module.exports.getManagerByManagerId = async (req, res) => {
-  let operatorId = req.params.managerId;
+  let managerId = req.params.managerId;
   let sqlQuery = "SELECT * FROM manager where managerId = ?";
-  db.query(sqlQuery, [operatorId], (error, result) => {
+  db.query(sqlQuery, [managerId], (error, result) => {
     if (error) {
       console.log(error);
       res.send(502).json({
@@ -199,9 +199,9 @@ module.exports.getManagerByManagerId = async (req, res) => {
 
 // get client by client Id
 module.exports.getClientByClientId = async (req, res) => {
-  let operatorId = req.params.clientId;
-  let sqlQuery = "SELECT * FROM operator where clientId = ?";
-  db.query(sqlQuery, [operatorId], (error, result) => {
+  let clientId = req.params.clientId;
+  let sqlQuery = "SELECT * FROM client where clientId = ?";
+  db.query(sqlQuery, [clientId], (error, result) => {
     if (error) {
       console.log(error);
       res.send(502).json({

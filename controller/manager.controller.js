@@ -718,9 +718,9 @@ module.exports.getOperatorByOperatorId = async (req, res) => {
 
 // get client by client Id
 module.exports.getClientByClientId = async (req, res) => {
-  let operatorId = req.params.clientId;
-  let sqlQuery = "SELECT * FROM operator where clientId = ?";
-  db.query(sqlQuery, [operatorId], (error, result) => {
+  let clientId = req.params.clientId;
+  let sqlQuery = "SELECT * FROM client where clientId = ?";
+  db.query(sqlQuery, [clientId], (error, result) => {
     if (error) {
       console.log(error);
       res.send(502).json({
