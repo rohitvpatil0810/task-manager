@@ -7,6 +7,8 @@ const {
   taskByOperatorId,
   getTaskTimelineByTaskId,
   getAttachmentsByTaskId,
+  getManagerByManagerId,
+  getClientByClientId,
 } = require("../../controller/operator.controller");
 const {
   requireOperatorAuth,
@@ -32,6 +34,18 @@ operatorRouter.post(
   "/changeTaskStatus/:id",
   requireOperatorAuth,
   changeTaskStatus
+);
+
+operatorRouter.get(
+  "/getManager/:managerId",
+  requireOperatorAuth,
+  getManagerByManagerId
+);
+
+operatorRouter.get(
+  "/getClient/:clientId",
+  requireOperatorAuth,
+  getClientByClientId
 );
 
 module.exports = operatorRouter;

@@ -345,3 +345,55 @@ module.exports.rejectTaskByClient = async (req, res) => {
     }
   });
 };
+
+// get operator by opertor Id
+module.exports.getOperatorByOperatorId = async (req, res) => {
+  let operatorId = req.params.operatorId;
+  let sqlQuery = "SELECT * FROM operator where operatorId = ?";
+  db.query(sqlQuery, [operatorId], (error, result) => {
+    if (error) {
+      console.log(error);
+      res.send(502).json({
+        success: true,
+        error: "Internal Server Error.",
+      });
+    }
+    if (result.length == 0) {
+      res.status(404).json({
+        success: false,
+        error: "No operator Found",
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        operator: result[0],
+      });
+    }
+  });
+};
+
+// get manager by manager Id
+module.exports.getManagerByManagerId = async (req, res) => {
+  let operatorId = req.params.managerId;
+  let sqlQuery = "SELECT * FROM manager where managerId = ?";
+  db.query(sqlQuery, [operatorId], (error, result) => {
+    if (error) {
+      console.log(error);
+      res.send(502).json({
+        success: true,
+        error: "Internal Server Error.",
+      });
+    }
+    if (result.length == 0) {
+      res.status(404).json({
+        success: false,
+        error: "No manager Found",
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        manager: result[0],
+      });
+    }
+  });
+};

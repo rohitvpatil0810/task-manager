@@ -3,7 +3,6 @@ const { checkPassword, hashPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const { generateId } = require("../utility/idGenerator");
 const { checkUserData } = require("../utility/checkUserData");
-const { response } = require("express");
 const maxAge = 3 * 24 * 60 * 60;
 
 // login Manager
@@ -687,6 +686,58 @@ module.exports.attachDocumentsByTaskId = async (req, res) => {
           }
         });
       }
+    }
+  });
+};
+
+// get operator by opertor Id
+module.exports.getOperatorByOperatorId = async (req, res) => {
+  let operatorId = req.params.operatorId;
+  let sqlQuery = "SELECT * FROM operator where operatorId = ?";
+  db.query(sqlQuery, [operatorId], (error, result) => {
+    if (error) {
+      console.log(error);
+      res.send(502).json({
+        success: true,
+        error: "Internal Server Error.",
+      });
+    }
+    if (result.length == 0) {
+      res.status(404).json({
+        success: false,
+        error: "No operator Found",
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        operator: result[0],
+      });
+    }
+  });
+};
+
+// get client by client Id
+module.exports.getClientByClientId = async (req, res) => {
+  let operatorId = req.params.clientId;
+  let sqlQuery = "SELECT * FROM operator where clientId = ?";
+  db.query(sqlQuery, [operatorId], (error, result) => {
+    if (error) {
+      console.log(error);
+      res.send(502).json({
+        success: true,
+        error: "Internal Server Error.",
+      });
+    }
+    if (result.length == 0) {
+      res.status(404).json({
+        success: false,
+        error: "No client Found",
+      });
+    } else {
+      res.status(200).json({
+        success: false,
+        client: result[0],
+      });
     }
   });
 };

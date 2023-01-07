@@ -10,6 +10,8 @@ const {
   getTaskTimelineByTaskId,
   attachDocumentsByTaskId,
   getAttachmentsByTaskId,
+  getOperatorByOperatorId,
+  getManagerByManagerId,
 } = require("../../controller/client.controller");
 const { requireClientAuth } = require("../../middleware/clientAuth.middleware");
 
@@ -37,5 +39,15 @@ clientRouter.get(
 );
 clientRouter.post("/approveTask/:id", requireClientAuth, clientApproval);
 clientRouter.post("/rejectTask/:id", requireClientAuth, rejectTaskByClient);
+clientRouter.get(
+  "/getOperator/:operatorId",
+  requireClientAuth,
+  getOperatorByOperatorId
+);
+clientRouter.get(
+  "/getManager/:managerId",
+  requireClientAuth,
+  getManagerByManagerId
+);
 
 module.exports = clientRouter;
