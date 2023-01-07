@@ -365,7 +365,7 @@ module.exports.getOperatorByOperatorId = async (req, res) => {
       });
     } else {
       res.status(200).json({
-        success: false,
+        success: true,
         operator: result[0],
       });
     }
@@ -391,7 +391,7 @@ module.exports.getManagerByManagerId = async (req, res) => {
       });
     } else {
       res.status(200).json({
-        success: false,
+        success: true,
         manager: result[0],
       });
     }

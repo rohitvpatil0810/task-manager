@@ -709,7 +709,7 @@ module.exports.getOperatorByOperatorId = async (req, res) => {
       });
     } else {
       res.status(200).json({
-        success: false,
+        success: true,
         operator: result[0],
       });
     }
@@ -735,7 +735,7 @@ module.exports.getClientByClientId = async (req, res) => {
       });
     } else {
       res.status(200).json({
-        success: false,
+        success: true,
         client: result[0],
       });
     }
