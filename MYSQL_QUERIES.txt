@@ -24,3 +24,6 @@ TASK TIMELINE SCHEMA -
 
 ATTACHMENTS SCHEMA - 
     CREATE TABLE IF NOT EXISTS attachments (attachmentId VARCHAR(255) PRIMARY KEY, taskId VARCHAR(255), documentName VARCHAR(255), driveLink VARCHAR(255), FOREIGN KEY (taskId) REFERENCES task(taskId));
+
+OPERATOR-STATUS SCHEMA - 
+    CREATE TABLE IF NOT EXISTS operatorStatus (statusId VARCHAR(255), operatorId VARCHAR(255), taskId VARCHAR(255), operatorNote VARCHAR(255), acceptStatus enum("Pending", "Accepted") DEFAULT "Pending", FOREIGN KEY (operatorId) REFERENCES operator(operatorId), FOREIGN KEY (taskId) REFERENCES task(taskId));

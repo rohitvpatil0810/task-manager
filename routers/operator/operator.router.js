@@ -9,6 +9,7 @@ const {
   getAttachmentsByTaskId,
   getManagerByManagerId,
   getClientByClientId,
+  acceptTask,
 } = require("../../controller/operator.controller");
 const {
   requireOperatorAuth,
@@ -30,6 +31,9 @@ operatorRouter.get(
   requireOperatorAuth,
   getAttachmentsByTaskId
 );
+
+operatorRouter.post("/acceptTask/:id", requireOperatorAuth, acceptTask);
+
 operatorRouter.post(
   "/changeTaskStatus/:id",
   requireOperatorAuth,

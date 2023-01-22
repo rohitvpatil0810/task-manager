@@ -145,6 +145,55 @@ module.exports.changeTaskStatus = async (req, res) => {
   });
 };
 
+module.exports.acceptTask = async (req, res) => {
+  let status = "inProgress";
+  let taskId = req.params.id;
+  let { operatorNote } = req.body;
+  let sqlQuery = "UPDATE task SET taskStatus = ? WHERE taskID = ?";
+
+  db.query(sqlQuery, [status, taskId], async (error, result) => {
+    if (error) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server Error.",
+      });
+      return;
+    } else {
+      sqlQuery =
+        "Update operatorStatus SET acceptStatus = ?, operatorNote = ? WHERE taskId = ?";
+      let queryInputs = ["Accepted", operatorNote, taskId];
+      db.query(sqlQuery, queryInputs, (error, result) => {
+        if (error) {
+          res.status(500).json({
+            success: false,
+            error: error,
+          });
+          return;
+        } else {
+          sqlQuery =
+            "UPDATE taskTimeline SET operatorAcceptDate = CURRENT_DATE WHERE taskId = ?";
+          db.query(sqlQuery, [taskId], (error, result) => {
+            if (error) {
+              console.log(error);
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error",
+              });
+              return;
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "status updated successfully.",
+              });
+              return;
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
 module.exports.taskByOperatorId = async (req, res) => {
   let operatorId = req.operator.operatorId;
   sqlQuery = "SELECT * FROM task WHERE operatorId = ?";

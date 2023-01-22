@@ -364,6 +364,7 @@ module.exports.assignTask = async (req, res) => {
   let sqlQuery = "SELECT * FROM task WHERE taskID = ?";
   db.query(sqlQuery, [taskId], async (error, result) => {
     if (error) {
+      console.log(error);
       res.status(502).json({
         success: false,
         error: "Internal Server Error.",
@@ -383,11 +384,12 @@ module.exports.assignTask = async (req, res) => {
           manager.managerNote,
           manager.priority,
           manager.AssignationStatus,
-          manager.taskStatus,
+          "Pending",
           taskId,
         ],
         (error, result) => {
           if (error) {
+            console.log(error);
             res.status(502).json({
               success: false,
               error: "Internal Server Error.",
@@ -398,16 +400,38 @@ module.exports.assignTask = async (req, res) => {
               "UPDATE taskTimeline SET assignationDate = CURRENT_DATE WHERE taskId = ?";
             db.query(sqlQuery, [taskId], (error, result) => {
               if (error) {
+                console.log(error);
                 res.status(502).json({
                   success: false,
                   error: "Internal Server Error",
                 });
                 return;
               } else {
-                res.status(200).json({
-                  success: true,
-                  data: "Task assigned and updated successfully.",
-                });
+                sqlQuery =
+                  "INSERT INTO operatorStatus (statusId, operatorId, taskId) VALUES ?";
+                let operatorStatusValues = [
+                  generateId(),
+                  manager.operatorId,
+                  taskId,
+                ];
+                db.query(
+                  sqlQuery,
+                  [[operatorStatusValues]],
+                  (error, result) => {
+                    if (error) {
+                      res.status(500).json({
+                        success: false,
+                        error: error,
+                      });
+                    } else {
+                      res.status(200).json({
+                        success: true,
+                        data: "Task assigned and updated successfully.",
+                      });
+                    }
+                  }
+                );
+
                 return;
               }
             });
