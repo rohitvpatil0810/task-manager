@@ -13,9 +13,11 @@ const {
   getDepartments,
 } = require("../../controller/admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
+const reportsRouter = require("../reports/reports.router");
 
 const adminRouter = Router();
 
+adminRouter.use("/reports", requireAdminAuth, reportsRouter);
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
 adminRouter.post("/addManager", requireAdminAuth, createNewManager);
 adminRouter.post("/addOperator", requireAdminAuth, createNewOperator);
