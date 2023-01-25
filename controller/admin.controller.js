@@ -5,6 +5,7 @@ const { generateId } = require("../utility/idGenerator");
 const { hashPassword, checkPassword } = require("../utility/passwordManager");
 const maxAge = 3 * 24 * 60 * 60;
 const { existsSync } = require("fs");
+const { sendEmail } = require("../utility/sendEmail");
 
 module.exports.getClientProfilePic = async (req, res) => {
   let clientId = req.params.clientId;
@@ -264,6 +265,7 @@ module.exports.createNewAdmin = async (req, res) => {
   }
 
   admin.id = generateId();
+  let originalPassword = admin.password;
   const newPassword = await hashPassword(admin.password);
   admin.password = newPassword;
   let values = [
@@ -293,6 +295,13 @@ module.exports.createNewAdmin = async (req, res) => {
           });
           return;
         } else {
+          let sendOptions = {
+            name: admin.name,
+            email: admin.email,
+            password: originalPassword,
+            role: "Admin",
+          };
+          sendEmail(sendOptions);
           res.status(200).json({
             success: true,
             data: "Admin created successfully.",
@@ -322,6 +331,7 @@ module.exports.createNewManager = async (req, res) => {
   }
 
   manager.managerId = generateId();
+  let originalPassword = manager.password;
   const newPassword = await hashPassword(manager.password);
   manager.password = newPassword;
   let values = [
@@ -351,6 +361,13 @@ module.exports.createNewManager = async (req, res) => {
           });
           return;
         } else {
+          let sendOptions = {
+            name: manager.name,
+            email: manager.email,
+            password: originalPassword,
+            role: "Manager",
+          };
+          sendEmail(sendOptions);
           res.status(200).json({
             success: true,
             data: "Manager created successfully.",
@@ -390,6 +407,7 @@ module.exports.createNewClient = async (req, res) => {
   }
 
   client.clientId = generateId();
+  let originalPassword = client.password;
   const newPassword = await hashPassword(client.password);
   client.password = newPassword;
   let values = [
@@ -420,6 +438,13 @@ module.exports.createNewClient = async (req, res) => {
           });
           return;
         } else {
+          let sendOptions = {
+            name: client.name,
+            email: client.email,
+            password: originalPassword,
+            role: "Client",
+          };
+          sendEmail(sendOptions);
           res.status(200).json({
             success: true,
             data: "Client created successfully.",

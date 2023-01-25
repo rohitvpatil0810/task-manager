@@ -201,6 +201,7 @@ module.exports.createNewOperator = async (req, res) => {
         }
 
         operator.operatorId = generateId();
+        let originalPassword = operator.password;
         const newPassword = await hashPassword(operator.password);
         operator.password = newPassword;
         let values = [
@@ -234,6 +235,13 @@ module.exports.createNewOperator = async (req, res) => {
                   });
                   return;
                 } else {
+                  let sendOptions = {
+                    name: operator.name,
+                    email: operator.email,
+                    password: originalPassword,
+                    role: "Operator",
+                  };
+                  sendEmail(sendOptions);
                   res.status(200).json({
                     success: true,
                     data: "Operator created successfully.",
