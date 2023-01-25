@@ -8,6 +8,7 @@ const path = require("path");
 const multer = require("multer");
 const { existsSync, unlinkSync } = require("fs");
 const sharp = require("sharp");
+const { sendEmail } = require("../utility/sendEmail");
 
 const upload = multer({
   storage: multer.diskStorage({
