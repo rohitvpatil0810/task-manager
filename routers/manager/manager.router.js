@@ -1,5 +1,9 @@
 const { Router } = require("express");
 const {
+  getOperatorProfilePic,
+  getClientProfilePic,
+} = require("../../controller/admin.controller");
+const {
   loginManager,
   logoutManager,
   getManagerProfile,
@@ -44,15 +48,26 @@ managerRouter.get(
   requireManagerAuth,
   getOperatorsByDepartment
 );
+
 managerRouter.get(
   "/getOperator/:operatorId",
   requireManagerAuth,
   getOperatorByOperatorId
 );
 managerRouter.get(
+  "/getOperatorProfilePic/:operatorId",
+  requireManagerAuth,
+  getOperatorProfilePic
+);
+managerRouter.get(
   "/getClient/:clientId",
   requireManagerAuth,
   getClientByClientId
+);
+managerRouter.get(
+  "/getClientProfilePic/:clientId",
+  requireManagerAuth,
+  getClientProfilePic
 );
 managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);

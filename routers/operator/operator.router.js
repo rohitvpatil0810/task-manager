@@ -1,5 +1,9 @@
 const { Router } = require("express");
 const {
+  getManagerProfilePic,
+  getClientProfilePic,
+} = require("../../controller/admin.controller");
+const {
   loginOperator,
   logoutOperator,
   getOperatorProfile,
@@ -49,11 +53,16 @@ operatorRouter.get(
   requireOperatorAuth,
   getManagerByManagerId
 );
+operatorRouter.get(
+  "/getManagerProfilePic/:managerId",
+  requireOperatorAuth,
+  getManagerProfilePic
+);
 
 operatorRouter.get(
-  "/getClient/:clientId",
+  "/getClientProfilePic/:clientId",
   requireOperatorAuth,
-  getClientByClientId
+  getClientProfilePic
 );
 
 module.exports = operatorRouter;
