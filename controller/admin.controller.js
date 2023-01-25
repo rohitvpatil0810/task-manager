@@ -4,6 +4,43 @@ const { createToken } = require("../utility/createJWToken");
 const { generateId } = require("../utility/idGenerator");
 const { hashPassword, checkPassword } = require("../utility/passwordManager");
 const maxAge = 3 * 24 * 60 * 60;
+const { existsSync } = require("fs");
+
+module.exports.getClientProfilePic = async (req, res) => {
+  let clientId = req.params.clientId;
+  if (existsSync("./uploads/client/" + clientId + ".jpeg")) {
+    res.download("./uploads/client/" + clientId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
+
+module.exports.getManagerProfilePic = async (req, res) => {
+  let managerId = req.params.managerId;
+  if (existsSync("./uploads/manager/" + managerId + ".jpeg")) {
+    res.download("./uploads/manager/" + managerId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
+
+module.exports.getOperatorProfilePic = async (req, res) => {
+  let operatorId = req.params.operatorId;
+  if (existsSync("./uploads/operator/" + operatorId + ".jpeg")) {
+    res.download("./uploads/operator/" + operatorId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
 
 // login Admin
 module.exports.loginAdmin = async (req, res) => {
@@ -63,6 +100,7 @@ module.exports.getManagers = async (req, res) => {
     }
   });
 };
+
 module.exports.getDepartments = async (req, res) => {
   let sqlQuery = "SELECT * FROM department";
   db.query(sqlQuery, (error, result) => {
