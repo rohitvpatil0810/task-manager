@@ -10,6 +10,8 @@ const {
   getManagerByManagerId,
   getClientByClientId,
   acceptTask,
+  uploadProfilePic,
+  getProfilePic,
 } = require("../../controller/operator.controller");
 const {
   requireOperatorAuth,
@@ -17,6 +19,8 @@ const {
 
 const operatorRouter = Router();
 
+operatorRouter.post("/profilePic", requireOperatorAuth, uploadProfilePic);
+operatorRouter.get("/profilePic", requireOperatorAuth, getProfilePic);
 operatorRouter.get("/profile", requireOperatorAuth, getOperatorProfile);
 operatorRouter.post("/login", loginOperator);
 operatorRouter.get("/logout", logoutOperator);

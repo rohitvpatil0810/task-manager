@@ -12,11 +12,15 @@ const {
   getAttachmentsByTaskId,
   getOperatorByOperatorId,
   getManagerByManagerId,
+  uploadProfilePic,
+  getProfilePic,
 } = require("../../controller/client.controller");
 const { requireClientAuth } = require("../../middleware/clientAuth.middleware");
 
 const clientRouter = Router();
 
+clientRouter.post("/profilePic", requireClientAuth, uploadProfilePic);
+clientRouter.get("/profilePic", requireClientAuth, getProfilePic);
 clientRouter.get("/profile", requireClientAuth, getClientProfile);
 clientRouter.post("/login", loginClient);
 clientRouter.get("/logout", logoutClient);

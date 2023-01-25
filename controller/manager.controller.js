@@ -4,6 +4,57 @@ const db = require("../database/db");
 const { generateId } = require("../utility/idGenerator");
 const { checkUserData } = require("../utility/checkUserData");
 const maxAge = 3 * 24 * 60 * 60;
+const path = require("path");
+const multer = require("multer");
+const { existsSync, unlinkSync } = require("fs");
+const sharp = require("sharp");
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/manager");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = req.manager.managerId + path.extname(file.originalname);
+      cb(null, req.fileName);
+    },
+  }),
+}).single("profilePic");
+
+module.exports.uploadProfilePic = async (req, res) => {
+  upload(req, res, async () => {
+    sharp("./uploads/manager/" + req.fileName)
+      .toFormat("jpeg")
+      .toFile(
+        "./uploads/manager/" + req.manager.managerId + ".jpeg",
+        (err, info) => {
+          if (err) {
+            res.status(502).json({
+              success: false,
+              error: err,
+            });
+          } else {
+            unlinkSync("./uploads/manager/" + req.fileName);
+            res.status(200).json({
+              success: true,
+              data: "Profile Pic Uploaded Successfully.",
+            });
+          }
+        }
+      );
+  });
+};
+
+module.exports.getProfilePic = async (req, res) => {
+  if (existsSync("./uploads/manager/" + req.manager.managerId + ".jpeg")) {
+    res.download("./uploads/manager/" + req.manager.managerId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
 
 // login Manager
 module.exports.loginManager = async (req, res) => {

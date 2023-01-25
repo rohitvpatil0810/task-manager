@@ -2,6 +2,58 @@ const { createToken } = require("../utility/createJWToken");
 const { checkPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const maxAge = 3 * 24 * 60 * 60;
+const path = require("path");
+const multer = require("multer");
+const { existsSync, unlinkSync } = require("fs");
+const sharp = require("sharp");
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/operator");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = req.operator.operatorId + path.extname(file.originalname);
+      cb(null, req.fileName);
+    },
+  }),
+}).single("profilePic");
+
+module.exports.uploadProfilePic = async (req, res) => {
+  upload(req, res, async () => {
+    console.log(req.operator.operatorId);
+    sharp("./uploads/operator/" + req.fileName)
+      .toFormat("jpeg")
+      .toFile(
+        "./uploads/operator/" + req.operator.operatorId + ".jpeg",
+        (err, info) => {
+          if (err) {
+            res.status(502).json({
+              success: false,
+              error: err,
+            });
+          } else {
+            unlinkSync("./uploads/operator/" + req.fileName);
+            res.status(200).json({
+              success: true,
+              data: "Profile Pic Uploaded Successfully.",
+            });
+          }
+        }
+      );
+  });
+};
+
+module.exports.getProfilePic = async (req, res) => {
+  if (existsSync("./uploads/operator/" + req.operator.operatorId + ".jpeg")) {
+    res.download("./uploads/operator/" + req.operator.operatorId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
 
 module.exports.loginOperator = async (req, res) => {
   let { email, password } = req.body;

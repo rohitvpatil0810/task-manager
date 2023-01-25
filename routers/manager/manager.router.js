@@ -22,6 +22,8 @@ const {
   getTasks,
   getOperatorByOperatorId,
   getClientByClientId,
+  uploadProfilePic,
+  getProfilePic,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -29,6 +31,8 @@ const {
 
 const managerRouter = Router();
 
+managerRouter.post("/profilePic", requireManagerAuth, uploadProfilePic);
+managerRouter.get("/profilePic", requireManagerAuth, getProfilePic);
 managerRouter.post("/addDepartment", requireManagerAuth, createNewDepartment);
 managerRouter.post("/addOperator", requireManagerAuth, createNewOperator);
 managerRouter.get("/profile", requireManagerAuth, getManagerProfile);

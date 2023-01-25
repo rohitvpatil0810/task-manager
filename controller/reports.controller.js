@@ -1,11 +1,10 @@
 const db = require("../database/db");
-
 module.exports.clientReports = async (req, res) => {
   const clientId = req.params.clientId;
   const { startDate, endDate } = req.body;
   sqlQuery =
     "SELECT taskName, t.openDate, assignationDate, operatorAcceptDate, actualCloseDate, t.closeDate, AssignationStatus, taskStatus FROM client NATURAL JOIN task NATURAL JOIN taskTimeline t  WHERE clientId = ? AND t.openDate BETWEEN ? AND ?";
-  db.query(sqlQuery, [clientId, startDate, endDate], (error, result) => {
+  db.query(sqlQuery, [clientId, startDate, endDate], async (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
