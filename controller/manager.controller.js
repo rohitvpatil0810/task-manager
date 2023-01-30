@@ -372,8 +372,8 @@ module.exports.getAttachmentsByTaskId = async (req, res) => {
   let taskId = req.params.taskId;
   let managerId = req.manager.managerId;
   let sqlQuery =
-    "SELECT a.* FROM attachments a NATURAL JOIN task t WHERE a.taskId = ? AND t.taskId = ? AND t.managerId = ?";
-  db.query(sqlQuery, [taskId, taskId, managerId], (error, result) => {
+    "SELECT a.* FROM attachments a NATURAL JOIN task t WHERE a.taskId = ? AND t.taskId = ?";
+  db.query(sqlQuery, [taskId, taskId], (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
