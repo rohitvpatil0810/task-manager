@@ -54,6 +54,11 @@ operatorRouter.get(
   getManagerByManagerId
 );
 operatorRouter.get(
+  "/getClient/:clientId",
+  requireOperatorAuth,
+  getClientByClientId
+);
+operatorRouter.get(
   "/getManagerProfilePic/:managerId",
   requireOperatorAuth,
   getManagerProfilePic
