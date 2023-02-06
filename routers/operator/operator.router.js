@@ -58,16 +58,8 @@ operatorRouter.get(
   requireOperatorAuth,
   getClientByClientId
 );
-operatorRouter.get(
-  "/getManagerProfilePic/:managerId",
-  requireOperatorAuth,
-  getManagerProfilePic
-);
+operatorRouter.get("/getManagerProfilePic/:managerId", getManagerProfilePic);
 
-operatorRouter.get(
-  "/getClientProfilePic/:clientId",
-  requireOperatorAuth,
-  getClientProfilePic
-);
+operatorRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
 
 module.exports = operatorRouter;

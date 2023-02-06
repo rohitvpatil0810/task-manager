@@ -48,21 +48,13 @@ clientRouter.get(
 clientRouter.post("/approveTask/:id", requireClientAuth, clientApproval);
 clientRouter.post("/rejectTask/:id", requireClientAuth, rejectTaskByClient);
 
-clientRouter.get(
-  "/getOperatorProfilePic/:operatorId",
-  requireClientAuth,
-  getOperatorProfilePic
-);
+clientRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 clientRouter.get(
   "/getOperator/:operatorId",
   requireClientAuth,
   getOperatorByOperatorId
 );
-clientRouter.get(
-  "getManagerProfilePic/:managerId",
-  requireClientAuth,
-  getManagerProfilePic
-);
+clientRouter.get("getManagerProfilePic/:managerId", getManagerProfilePic);
 clientRouter.get(
   "/getManager/:managerId",
   requireClientAuth,

@@ -54,21 +54,13 @@ managerRouter.get(
   requireManagerAuth,
   getOperatorByOperatorId
 );
-managerRouter.get(
-  "/getOperatorProfilePic/:operatorId",
-  requireManagerAuth,
-  getOperatorProfilePic
-);
+managerRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 managerRouter.get(
   "/getClient/:clientId",
   requireManagerAuth,
   getClientByClientId
 );
-managerRouter.get(
-  "/getClientProfilePic/:clientId",
-  requireManagerAuth,
-  getClientProfilePic
-);
+managerRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
 managerRouter.post("/rejectTask/:taskId", requireManagerAuth, rejectTask);
 managerRouter.post("/assignTask/:id", requireManagerAuth, assignTask);
 managerRouter.post("/createTask", requireManagerAuth, createTask);
