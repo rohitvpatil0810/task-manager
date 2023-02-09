@@ -212,6 +212,7 @@ module.exports.createNewOperator = async (req, res) => {
           operator.mobile,
           operator.password,
           operator.departmentId,
+          "Active",
         ];
         sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
         db.query(
@@ -227,7 +228,7 @@ module.exports.createNewOperator = async (req, res) => {
             }
             if (result.length == 0) {
               sqlQuery =
-                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId) VALUES ?";
+                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
               db.query(sqlQuery, [[values]], (error, result) => {
                 if (error) {
                   res.status(502).json({
@@ -259,6 +260,42 @@ module.exports.createNewOperator = async (req, res) => {
           }
         );
       }
+    });
+  }
+};
+
+// delete an operator
+module.exports.deleteOperator = async (req, res) => {
+  let { operatorId } = req.body;
+  if (operatorId) {
+    let sqlQuery = "SELECT * FROM operator where operatorId = ?";
+    db.query(sqlQuery, [operatorId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error.",
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery =
+          "UPDATE operator SET active = 'Deleted' where operatorId = ?";
+        db.query(sqlQuery, [operatorId], (err, result) => {
+          if (err) {
+            res
+              .status(502)
+              .json({ success: false, error: "Internal Server Error." });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Operator Deleted Successfully.",
+          });
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Operator Found.",
     });
   }
 };
@@ -351,7 +388,8 @@ module.exports.createTask = async (req, res) => {
 module.exports.getOperatorsByDepartment = async (req, res) => {
   let departmentId = req.params.departmentId;
   console.log(departmentId);
-  sqlQuery = "SELECT * FROM operator WHERE departmentId = ?";
+  sqlQuery =
+    "SELECT * FROM operator WHERE departmentId = ? AND active = 'Active'";
   db.query(sqlQuery, [departmentId], (error, result) => {
     if (error) {
       res.status(502).json({
@@ -434,70 +472,87 @@ module.exports.assignTask = async (req, res) => {
 
     if (result.length != 0) {
       sqlQuery =
-        "UPDATE task SET operatorId = ? , managerId = ? , managerNote = ? , priority = ? , AssignationStatus = ? , taskStatus = ? WHERE taskID = ?";
+        "SELECT * FROM operator Where operatorId = ? AND active = 'Active'";
+      db.query(sqlQuery, [manager.operatorId], (err, result) => {
+        if (err) {
+          res.status(502).json({
+            success: false,
+            error: "Internal Server Error.",
+          });
+        }
+        if (result.length == 1) {
+          sqlQuery =
+            "UPDATE task SET operatorId = ? , managerId = ? , managerNote = ? , priority = ? , AssignationStatus = ? , taskStatus = ? WHERE taskID = ?";
 
-      db.query(
-        sqlQuery,
-        [
-          manager.operatorId,
-          managerId,
-          manager.managerNote,
-          manager.priority,
-          manager.AssignationStatus,
-          "Pending",
-          taskId,
-        ],
-        (error, result) => {
-          if (error) {
-            console.log(error);
-            res.status(502).json({
-              success: false,
-              error: "Internal Server Error.",
-            });
-            return;
-          } else {
-            sqlQuery =
-              "UPDATE taskTimeline SET assignationDate = CURRENT_DATE WHERE taskId = ?";
-            db.query(sqlQuery, [taskId], (error, result) => {
+          db.query(
+            sqlQuery,
+            [
+              manager.operatorId,
+              managerId,
+              manager.managerNote,
+              manager.priority,
+              manager.AssignationStatus,
+              "Pending",
+              taskId,
+            ],
+            (error, result) => {
               if (error) {
                 console.log(error);
                 res.status(502).json({
                   success: false,
-                  error: "Internal Server Error",
+                  error: "Internal Server Error.",
                 });
                 return;
               } else {
                 sqlQuery =
-                  "INSERT INTO operatorStatus (statusId, operatorId, taskId) VALUES ?";
-                let operatorStatusValues = [
-                  generateId(),
-                  manager.operatorId,
-                  taskId,
-                ];
-                db.query(
-                  sqlQuery,
-                  [[operatorStatusValues]],
-                  (error, result) => {
-                    if (error) {
-                      res.status(500).json({
-                        success: false,
-                        error: error,
-                      });
-                    } else {
-                      res.status(200).json({
-                        success: true,
-                        data: "Task assigned and updated successfully.",
-                      });
-                    }
-                  }
-                );
+                  "UPDATE taskTimeline SET assignationDate = CURRENT_DATE WHERE taskId = ?";
+                db.query(sqlQuery, [taskId], (error, result) => {
+                  if (error) {
+                    console.log(error);
+                    res.status(502).json({
+                      success: false,
+                      error: "Internal Server Error",
+                    });
+                    return;
+                  } else {
+                    sqlQuery =
+                      "INSERT INTO operatorStatus (statusId, operatorId, taskId) VALUES ?";
+                    let operatorStatusValues = [
+                      generateId(),
+                      manager.operatorId,
+                      taskId,
+                    ];
+                    db.query(
+                      sqlQuery,
+                      [[operatorStatusValues]],
+                      (error, result) => {
+                        if (error) {
+                          res.status(500).json({
+                            success: false,
+                            error: error,
+                          });
+                        } else {
+                          res.status(200).json({
+                            success: true,
+                            data: "Task assigned and updated successfully.",
+                          });
+                        }
+                      }
+                    );
 
-                return;
+                    return;
+                  }
+                });
               }
-            });
-          }
+            }
+          );
+        } else {
+          res.status(404).json({
+            success: false,
+            error: "Operator does not exists or Deleted. Please Refresh list.",
+          });
         }
-      );
+      });
     } else {
       res.status(502).json({
         status: false,

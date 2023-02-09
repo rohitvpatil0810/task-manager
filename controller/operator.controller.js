@@ -57,7 +57,7 @@ module.exports.getProfilePic = async (req, res) => {
 
 module.exports.loginOperator = async (req, res) => {
   let { email, password } = req.body;
-  let sqlQuery = "SELECT * FROM operator WHERE email = ?";
+  let sqlQuery = "SELECT * FROM operator WHERE email = ? AND active = 'Active'";
   let value = [email];
   db.query(sqlQuery, [value], async (error, result) => {
     if (error) {

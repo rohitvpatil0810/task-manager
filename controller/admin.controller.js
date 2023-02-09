@@ -120,7 +120,7 @@ module.exports.getDepartments = async (req, res) => {
 };
 
 module.exports.getOperators = async (req, res) => {
-  let sqlQuery = "SELECT * FROM operator";
+  let sqlQuery = "SELECT * FROM operator where active = 'Active'";
   db.query(sqlQuery, "", async (err, result) => {
     if (err) {
       res.status(502).json({
@@ -183,6 +183,7 @@ module.exports.createNewOperator = async (req, res) => {
           operator.mobile,
           operator.password,
           operator.departmentId,
+          "Active",
         ];
         sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
         db.query(
@@ -198,7 +199,7 @@ module.exports.createNewOperator = async (req, res) => {
             }
             if (result.length == 0) {
               sqlQuery =
-                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId) VALUES ?";
+                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
               db.query(sqlQuery, [[values]], (error, result) => {
                 if (error) {
                   res.status(502).json({

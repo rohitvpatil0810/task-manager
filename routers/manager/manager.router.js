@@ -28,6 +28,7 @@ const {
   getClientByClientId,
   uploadProfilePic,
   getProfilePic,
+  deleteOperator,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
@@ -39,6 +40,7 @@ managerRouter.post("/profilePic", requireManagerAuth, uploadProfilePic);
 managerRouter.get("/profilePic", requireManagerAuth, getProfilePic);
 managerRouter.post("/addDepartment", requireManagerAuth, createNewDepartment);
 managerRouter.post("/addOperator", requireManagerAuth, createNewOperator);
+managerRouter.post("/deleteOperator", requireManagerAuth, deleteOperator);
 managerRouter.get("/profile", requireManagerAuth, getManagerProfile);
 managerRouter.post("/login", loginManager);
 managerRouter.get("/logout", logoutManager);
