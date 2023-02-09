@@ -235,6 +235,42 @@ module.exports.createNewOperator = async (req, res) => {
   }
 };
 
+// delete an operator
+module.exports.deleteOperator = async (req, res) => {
+  let { operatorId } = req.body;
+  if (operatorId) {
+    let sqlQuery = "SELECT * FROM operator where operatorId = ?";
+    db.query(sqlQuery, [operatorId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error.",
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery =
+          "UPDATE operator SET active = 'Deleted' where operatorId = ?";
+        db.query(sqlQuery, [operatorId], (err, result) => {
+          if (err) {
+            res
+              .status(502)
+              .json({ success: false, error: "Internal Server Error." });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Operator Deleted Successfully.",
+          });
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Operator Found.",
+    });
+  }
+};
+
 module.exports.getClients = async (req, res) => {
   let sqlQuery = "SELECT * FROM client";
   db.query(sqlQuery, "", async (err, result) => {

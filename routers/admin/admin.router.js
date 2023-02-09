@@ -14,6 +14,7 @@ const {
   getClientProfilePic,
   getManagerProfilePic,
   getOperatorProfilePic,
+  deleteOperator,
 } = require("../../controller/admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
@@ -39,6 +40,7 @@ adminRouter.get(
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
 adminRouter.post("/addManager", requireAdminAuth, createNewManager);
 adminRouter.post("/addOperator", requireAdminAuth, createNewOperator);
+adminRouter.post("/deleteOperator", requireAdminAuth, deleteOperator);
 adminRouter.get("/getOperators", requireAdminAuth, getOperators);
 adminRouter.get("/getDepartments", requireAdminAuth, getDepartments);
 adminRouter.get("/getManagers", requireAdminAuth, getManagers);
