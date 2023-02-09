@@ -14,6 +14,7 @@ const upload = multer({
       cb(null, "uploads/client");
     },
     filename: function (req, file, cb) {
+      console.log(file.originalname);
       req.fileName = req.client.cliendId + path.extname(file.originalname);
       cb(null, req.fileName);
     },
