@@ -22,21 +22,9 @@ const reportsRouter = require("../reports/reports.router");
 const adminRouter = Router();
 
 adminRouter.use("/reports", requireAdminAuth, reportsRouter);
-adminRouter.get(
-  "/getClientProfilePic/:clientId",
-  requireAdminAuth,
-  getClientProfilePic
-);
-adminRouter.get(
-  "/getManagerProfilePic/:managerId",
-  requireAdminAuth,
-  getManagerProfilePic
-);
-adminRouter.get(
-  "/getOperatorProfilePic/:operatorId",
-  requireAdminAuth,
-  getOperatorProfilePic
-);
+adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
+adminRouter.get("/getManagerProfilePic/:managerId", getManagerProfilePic);
+adminRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
 adminRouter.post("/addManager", requireAdminAuth, createNewManager);
 adminRouter.post("/addOperator", requireAdminAuth, createNewOperator);
