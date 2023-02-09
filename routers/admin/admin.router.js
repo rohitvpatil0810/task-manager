@@ -28,7 +28,11 @@ adminRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
 adminRouter.post("/addManager", requireAdminAuth, createNewManager);
 adminRouter.post("/addOperator", requireAdminAuth, createNewOperator);
-adminRouter.post("/deleteOperator", requireAdminAuth, deleteOperator);
+adminRouter.get(
+  "/deleteOperator/:operatorId",
+  requireAdminAuth,
+  deleteOperator
+);
 adminRouter.get("/getOperators", requireAdminAuth, getOperators);
 adminRouter.get("/getDepartments", requireAdminAuth, getDepartments);
 adminRouter.get("/getManagers", requireAdminAuth, getManagers);

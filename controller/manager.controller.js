@@ -266,7 +266,7 @@ module.exports.createNewOperator = async (req, res) => {
 
 // delete an operator
 module.exports.deleteOperator = async (req, res) => {
-  let { operatorId } = req.body;
+  let operatorId = req.params.operatorId;
   if (operatorId) {
     let sqlQuery = "SELECT * FROM operator where operatorId = ?";
     db.query(sqlQuery, [operatorId], (err, result) => {
