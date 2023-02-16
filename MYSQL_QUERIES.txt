@@ -27,3 +27,6 @@ ATTACHMENTS SCHEMA -
 
 OPERATOR-STATUS SCHEMA - 
     CREATE TABLE IF NOT EXISTS operatorStatus (statusId VARCHAR(255), operatorId VARCHAR(255), taskId VARCHAR(255), operatorNote VARCHAR(255), acceptStatus enum("Pending", "Accepted") DEFAULT "Pending", FOREIGN KEY (operatorId) REFERENCES operator(operatorId), FOREIGN KEY (taskId) REFERENCES task(taskId));
+
+PROJECT SCHEMA - 
+    CREATE TABLE IF NOT EXISTS projects (projectId VARCHAR(255), projectName VARCHAR(255), active enum ('Active', 'Deleted') DEFAULT 'Active' )
