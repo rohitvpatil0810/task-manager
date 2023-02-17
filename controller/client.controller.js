@@ -171,7 +171,7 @@ module.exports.createTask = async (req, res) => {
   let values = [
     task.taskID,
     clientId,
-    task.ProjectName,
+    task.projectId,
     task.taskName,
     task.taskDescription,
     task.openDate,
@@ -181,20 +181,19 @@ module.exports.createTask = async (req, res) => {
   ];
 
   let sqlQuery =
-    "INSERT INTO task (taskID , clientId , ProjectName , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
-
-  db.query(sqlQuery, [[values]], (error, result) => {
-    if (error) {
+    "SELECT * FROM  project where projectId = ? AND active = 'Active'";
+  db.query(sqlQuery, [task.projectId], (err, result) => {
+    if (err) {
       res.status(502).json({
         success: false,
-        error: "Internal Server Error.",
+        error: toString(err),
       });
       return;
-    } else {
-      let taskTimelineId = generateId();
-      values = [taskTimelineId, task.taskID, task.openDate, task.closeDate];
+    }
+    if (result.length == 1) {
       sqlQuery =
-        "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
+        "INSERT INTO task (taskID , clientId , projectId , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
+
       db.query(sqlQuery, [[values]], (error, result) => {
         if (error) {
           res.status(502).json({
@@ -203,11 +202,31 @@ module.exports.createTask = async (req, res) => {
           });
           return;
         } else {
-          res.status(200).json({
-            success: true,
-            data: "Task created successfully.",
+          let taskTimelineId = generateId();
+          values = [taskTimelineId, task.taskID, task.openDate, task.closeDate];
+          sqlQuery =
+            "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
+          db.query(sqlQuery, [[values]], (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error.",
+              });
+              return;
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Task created successfully.",
+              });
+            }
           });
         }
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error:
+          "Please refresh the project list as project seems to be deleted.",
       });
     }
   });
