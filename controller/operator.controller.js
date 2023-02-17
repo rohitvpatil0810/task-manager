@@ -55,6 +55,39 @@ module.exports.getProfilePic = async (req, res) => {
   }
 };
 
+// projects
+module.exports.getProjectbyProjectId = async (req, res) => {
+  let projectId = req.params.projectId;
+  let sqlQuery = "SELECT * FROM project where projectId = ?";
+  db.query(sqlQuery, [projectId], async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    }
+    if (result.length == 1) {
+      res.status(200).json({
+        success: true,
+        data: result[0],
+      });
+    }
+  });
+};
+
+module.exports.getProjectIcon = async (req, res) => {
+  let projectId = req.params.projectId;
+  if (existsSync("./uploads/project/" + projectId + ".jpeg")) {
+    res.download("./uploads/project/" + projectId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No project icon found",
+    });
+  }
+};
+
 module.exports.loginOperator = async (req, res) => {
   let { email, password } = req.body;
   let sqlQuery = "SELECT * FROM operator WHERE email = ? AND active = 'Active'";

@@ -78,8 +78,7 @@ module.exports.getProjects = async (req, res) => {
 
 module.exports.getProjectbyProjectId = async (req, res) => {
   let projectId = req.params.projectId;
-  let sqlQuery =
-    "SELECT * FROM project where active = 'Active' AND projectId = ?";
+  let sqlQuery = "SELECT * FROM project where projectId = ?";
   db.query(sqlQuery, [projectId], async (err, result) => {
     if (err) {
       res.status(502).json({

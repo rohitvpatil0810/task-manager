@@ -16,12 +16,22 @@ const {
   acceptTask,
   uploadProfilePic,
   getProfilePic,
+  getProjectbyProjectId,
+  getProjectIcon,
 } = require("../../controller/operator.controller");
 const {
   requireOperatorAuth,
 } = require("../../middleware/operatorAuth.middleware");
 
 const operatorRouter = Router();
+
+// projects
+operatorRouter.get(
+  "/getProject/:projectId",
+  requireOperatorAuth,
+  getProjectbyProjectId
+);
+operatorRouter.get("/getProjectIcon/:projectId", getProjectIcon);
 
 operatorRouter.post("/profilePic", requireOperatorAuth, uploadProfilePic);
 operatorRouter.get("/profilePic", requireOperatorAuth, getProfilePic);
