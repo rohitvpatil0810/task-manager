@@ -11,7 +11,8 @@ const requireManagerAuth = async (req, res, next) => {
           error: "Manager is not authenticated.",
         });
       } else {
-        let sqlQuery = "SELECT * FROM manager WHERE managerId = ?";
+        let sqlQuery =
+          "SELECT * FROM manager WHERE managerId = ? where active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({

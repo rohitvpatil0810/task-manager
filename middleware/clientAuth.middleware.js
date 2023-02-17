@@ -11,7 +11,8 @@ const requireClientAuth = async (req, res, next) => {
           error: "Client is not authenticated.",
         });
       } else {
-        let sqlQuery = "SELECT * FROM client WHERE clientId = ?";
+        let sqlQuery =
+          "SELECT * FROM client WHERE clientId = ? where active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({

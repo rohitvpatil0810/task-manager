@@ -11,7 +11,8 @@ const requireOperatorAuth = async (req, res, next) => {
           error: "Operator is not authenticated.",
         });
       } else {
-        let sqlQuery = "SELECT * FROM operator WHERE operatorId = ?";
+        let sqlQuery =
+          "SELECT * FROM operator WHERE operatorId = ? where active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({
