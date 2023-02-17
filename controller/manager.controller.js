@@ -394,7 +394,7 @@ module.exports.createTask = async (req, res) => {
   let values = [
     task.taskID,
     task.clientId,
-    task.ProjectName,
+    task.projectId,
     task.taskName,
     task.taskDescription,
     task.openDate,
@@ -404,33 +404,76 @@ module.exports.createTask = async (req, res) => {
   ];
 
   let sqlQuery =
-    "INSERT INTO task (taskID , clientId , ProjectName , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
-
-  db.query(sqlQuery, [[values]], (error, result) => {
-    if (error) {
+    "SELECT * FROM project where projectId = ? AND active = 'Active'";
+  db.query(sqlQuery, [task.projectId], (err, result) => {
+    if (err) {
       res.status(502).json({
         success: false,
-        error: "Internal Server Error.",
+        error: toString(err),
       });
       return;
-    } else {
-      let taskTimelineId = generateId();
-      values = [taskTimelineId, task.taskID, task.openDate, task.closeDate];
+    }
+    if (result.length == 1) {
       sqlQuery =
-        "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
-      db.query(sqlQuery, [[values]], (error, result) => {
-        if (error) {
+        "SELECT * FROM client where clientId = ? AND active = 'Active'";
+      db.query(sqlQuery, [task.clientId], (err, result) => {
+        if (err) {
           res.status(502).json({
             success: false,
-            error: "Internal Server Error.",
+            error: toString(err),
           });
           return;
+        }
+        if (result.length == 1) {
+          sqlQuery =
+            "INSERT INTO task (taskID , clientId , projectId , taskName , taskDescription , openDate , closeDate , clientNote , taskCategory) VALUES ?";
+
+          db.query(sqlQuery, [[values]], (error, result) => {
+            if (error) {
+              res.status(502).json({
+                success: false,
+                error: "Internal Server Error.",
+              });
+              return;
+            } else {
+              let taskTimelineId = generateId();
+              values = [
+                taskTimelineId,
+                task.taskID,
+                task.openDate,
+                task.closeDate,
+              ];
+              sqlQuery =
+                "INSERT INTO taskTimeline (timelineId, taskId, openDate, closeDate) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error.",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Task created successfully.",
+                  });
+                }
+              });
+            }
+          });
         } else {
-          res.status(200).json({
-            success: true,
-            data: "Task created successfully.",
+          res.status(404).json({
+            success: false,
+            error:
+              "Please Refresh the client List as client seems to be deleted.",
           });
         }
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error:
+          "Please Refresh the project List as Project seems to be deleted.",
       });
     }
   });
