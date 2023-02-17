@@ -29,12 +29,25 @@ const {
   uploadProfilePic,
   getProfilePic,
   deleteOperator,
+  getProjectbyProjectId,
+  getProjects,
+  getProjectIcon,
 } = require("../../controller/manager.controller");
 const {
   requireManagerAuth,
 } = require("../../middleware/managerAuth.middleware");
 
 const managerRouter = Router();
+
+// projects
+
+managerRouter.get("/getProjects", requireManagerAuth, getProjects);
+managerRouter.get(
+  "/getProject/:projectId",
+  requireManagerAuth,
+  getProjectbyProjectId
+);
+managerRouter.get("/getProjectIcon/:projectId", getProjectIcon);
 
 managerRouter.post("/profilePic", requireManagerAuth, uploadProfilePic);
 managerRouter.get("/profilePic", requireManagerAuth, getProfilePic);
