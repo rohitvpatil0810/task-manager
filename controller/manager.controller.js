@@ -678,7 +678,7 @@ module.exports.assignedTask = (req, res) => {
 
 module.exports.getTasks = (req, res) => {
   let id = req.manager.managerId;
-  let sqlQuery = "SELECT * FROM task WHERE managerId = ?";
+  let sqlQuery = "SELECT * FROM task NATURAL JOIN project WHERE managerId = ?";
   db.query(sqlQuery, [id], (error, result) => {
     if (error) {
       res.status(502).json({
@@ -695,7 +695,8 @@ module.exports.getTasks = (req, res) => {
 };
 
 module.exports.notAssignedTask = async (req, res) => {
-  let sqlQuery = "SELECT * FROM task WHERE AssignationStatus = ?";
+  let sqlQuery =
+    "SELECT * FROM task NATURAL JOIN project WHERE AssignationStatus = ?";
   let status = "Pending";
   db.query(sqlQuery, [status], (error, result) => {
     if (error) {
@@ -714,7 +715,8 @@ module.exports.notAssignedTask = async (req, res) => {
 
 module.exports.inProgressTask = async (req, res) => {
   let id = req.manager.managerId;
-  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ? AND managerId = ?";
+  let sqlQuery =
+    "SELECT * FROM task NATURAL JOIN project WHERE taskStatus = ? AND managerId = ?";
   let status = "inProgress";
   db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
@@ -733,7 +735,8 @@ module.exports.inProgressTask = async (req, res) => {
 
 module.exports.completedTask = async (req, res) => {
   let id = req.manager.managerId;
-  let sqlQuery = "SELECT * FROM task WHERE taskStatus = ? AND managerId = ?";
+  let sqlQuery =
+    "SELECT * FROM task NATURAL JOIN project WHERE taskStatus = ? AND managerId = ?";
   let status = "Completed";
   db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {

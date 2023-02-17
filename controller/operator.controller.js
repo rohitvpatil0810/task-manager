@@ -281,7 +281,7 @@ module.exports.acceptTask = async (req, res) => {
 
 module.exports.taskByOperatorId = async (req, res) => {
   let operatorId = req.operator.operatorId;
-  sqlQuery = "SELECT * FROM task WHERE operatorId = ?";
+  sqlQuery = "SELECT * FROM task NATURAL JOIN project WHERE operatorId = ?";
   db.query(sqlQuery, [operatorId], async (error, result) => {
     if (error) {
       res.status(502).json({

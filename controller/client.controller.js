@@ -330,7 +330,7 @@ module.exports.attachDocumentsByTaskId = async (req, res) => {
 
 module.exports.trackYourTask = async (req, res) => {
   let id = req.client.clientId;
-  let sqlQuery = "SELECT * FROM task WHERE clientId = ?";
+  let sqlQuery = "SELECT * FROM task NATURAL JOIN project WHERE clientId = ?";
 
   db.query(sqlQuery, [id], async (error, result) => {
     if (error) {
