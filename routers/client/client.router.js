@@ -18,11 +18,21 @@ const {
   getManagerByManagerId,
   uploadProfilePic,
   getProfilePic,
+  getProjects,
+  getProjectbyProjectId,
+  getProjectIcon,
 } = require("../../controller/client.controller");
 const { requireClientAuth } = require("../../middleware/clientAuth.middleware");
 
 const clientRouter = Router();
 
+clientRouter.get("/getProjects", requireClientAuth, getProjects);
+clientRouter.get(
+  "/getProject/:projectId",
+  requireClientAuth,
+  getProjectbyProjectId
+);
+clientRouter.get("/getProjectIcon/:projectId", getProjectIcon);
 clientRouter.post("/profilePic", requireClientAuth, uploadProfilePic);
 clientRouter.get("/profilePic", requireClientAuth, getProfilePic);
 clientRouter.get("/profile", requireClientAuth, getClientProfile);
