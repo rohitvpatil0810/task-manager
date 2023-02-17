@@ -29,6 +29,7 @@ module.exports.uploadProfilePic = async (req, res) => {
         "./uploads/client/" + req.client.clientId + ".jpeg",
         (err, info) => {
           if (err) {
+            unlinkSync("./uploads/client/" + req.fileName);
             res.status(502).json({
               success: false,
               error: err,

@@ -4,8 +4,201 @@ const { createToken } = require("../utility/createJWToken");
 const { generateId } = require("../utility/idGenerator");
 const { hashPassword, checkPassword } = require("../utility/passwordManager");
 const maxAge = 3 * 24 * 60 * 60;
-const { existsSync } = require("fs");
+const { existsSync, unlinkSync } = require("fs");
 const { sendEmail } = require("../utility/sendEmail");
+const multer = require("multer");
+const path = require("path");
+const sharp = require("sharp");
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/project");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("projectIcon");
+
+module.exports.createNewProject = async (req, res) => {
+  upload(req, res, async () => {
+    const projectName = req.body.projectName;
+    const projectId = generateId();
+    let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
+    db.query(sqlQuery, [projectName], (err, result) => {
+      if (err) {
+        unlinkSync("./uploads/project/" + req.fileName);
+      }
+      if (result.length == 0) {
+        sharp("./uploads/project/" + req.fileName)
+          .toFormat("jpeg")
+          .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
+            if (err) {
+              console.log(1, err);
+              res.status(502).json({
+                success: false,
+                error: toString(err),
+              });
+              return;
+            } else {
+              unlinkSync("./uploads/project/" + req.fileName);
+              sqlQuery =
+                "INSERT INTO project (projectId, projectName) VALUES ?";
+              db.query(
+                sqlQuery,
+                [[[projectId, projectName]]],
+                (err, result) => {
+                  if (err) {
+                    console.log(2, err);
+                    unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                    res.status(502).json({
+                      success: false,
+                      error: toString(err),
+                    });
+                    return;
+                  }
+                  res.status(200).json({
+                    success: true,
+                    data: "Project Added Successfully.",
+                  });
+                }
+              );
+            }
+          });
+      } else {
+        unlinkSync("./uploads/project/" + req.fileName);
+        res.status(403).json({
+          success: false,
+          error: "Project Already Exists in system with same name.",
+        });
+      }
+    });
+  });
+};
+
+module.exports.deleteProject = async (req, res) => {
+  let projectId = req.params.projectId;
+  if (projectId) {
+    let sqlQuery = "SELECT * FROM project where projectId = ?";
+    db.query(sqlQuery, [projectId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE project SET active = 'Deleted' where projectId = ?";
+        db.query(sqlQuery, [projectId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Project Deleted Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Project Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Project Found.",
+    });
+  }
+};
+
+module.exports.activateProject = async (req, res) => {
+  let projectId = req.params.projectId;
+  if (projectId) {
+    let sqlQuery = "SELECT * FROM project where projectId = ?";
+    db.query(sqlQuery, [projectId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE project SET active = 'Active' where projectId = ?";
+        db.query(sqlQuery, [projectId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Project Activated Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Project Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Project Found.",
+    });
+  }
+};
+
+module.exports.getProjectIcon = async (req, res) => {
+  let projectId = req.params.projectId;
+  if (existsSync("./uploads/project/" + projectId + ".jpeg")) {
+    res.download("./uploads/project/" + projectId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No project icon found",
+    });
+  }
+};
+
+module.exports.getProjects = async (req, res) => {
+  let sqlQuery = "SELECT * FROM project where active = 'Active'";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.getDeactivatedProjects = async (req, res) => {
+  let sqlQuery = "SELECT * FROM project where active = 'Deleted'";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
 
 module.exports.getClientProfilePic = async (req, res) => {
   let clientId = req.params.clientId;
@@ -85,7 +278,25 @@ module.exports.loginAdmin = async (req, res) => {
 };
 
 module.exports.getManagers = async (req, res) => {
-  let sqlQuery = "SELECT * FROM manager";
+  let sqlQuery = "SELECT * FROM manager where active = 'Active'";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.getDeactivatedManagers = async (req, res) => {
+  let sqlQuery = "SELECT * FROM manager where active = 'Deleted'";
   db.query(sqlQuery, "", async (err, result) => {
     if (err) {
       res.status(502).json({
@@ -121,6 +332,24 @@ module.exports.getDepartments = async (req, res) => {
 
 module.exports.getOperators = async (req, res) => {
   let sqlQuery = "SELECT * FROM operator where active = 'Active'";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.getDeactivatedOperators = async (req, res) => {
+  let sqlQuery = "SELECT * FROM operator where active = 'Deleted'";
   db.query(sqlQuery, "", async (err, result) => {
     if (err) {
       res.status(502).json({
@@ -261,6 +490,48 @@ module.exports.deleteOperator = async (req, res) => {
             data: "Operator Deleted Successfully.",
           });
         });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Operator Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Operator Found.",
+    });
+  }
+};
+
+module.exports.activateOperator = async (req, res) => {
+  let operatorId = req.params.operatorId;
+  if (operatorId) {
+    let sqlQuery = "SELECT * FROM operator where operatorId = ?";
+    db.query(sqlQuery, [operatorId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE operator SET active = 'Active' where operatorId = ?";
+        db.query(sqlQuery, [operatorId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Operator Activated Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Operator Found.",
+        });
       }
     });
   } else {
@@ -272,7 +543,25 @@ module.exports.deleteOperator = async (req, res) => {
 };
 
 module.exports.getClients = async (req, res) => {
-  let sqlQuery = "SELECT * FROM client";
+  let sqlQuery = "SELECT * FROM client where active = 'Active'";
+  db.query(sqlQuery, "", async (err, result) => {
+    if (err) {
+      res.status(502).json({
+        success: false,
+        error: "Internal Server error",
+        log: err,
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    }
+  });
+};
+
+module.exports.getDeactivatedClients = async (req, res) => {
+  let sqlQuery = "SELECT * FROM client where active = 'Deleted'";
   db.query(sqlQuery, "", async (err, result) => {
     if (err) {
       res.status(502).json({
@@ -429,6 +718,80 @@ module.exports.createNewManager = async (req, res) => {
   });
 };
 
+module.exports.deleteManager = async (req, res) => {
+  let managerId = req.params.managerId;
+  if (managerId) {
+    let sqlQuery = "SELECT * FROM manager where managerId = ?";
+    db.query(sqlQuery, [managerId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE manager SET active = 'Deleted' where managerId = ?";
+        db.query(sqlQuery, [managerId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Manager Deleted Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Manager Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Manager Found.",
+    });
+  }
+};
+
+module.exports.activateManager = async (req, res) => {
+  let managerId = req.params.managerId;
+  if (managerId) {
+    let sqlQuery = "SELECT * FROM manager where managerId = ?";
+    db.query(sqlQuery, [managerId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE manager SET active = 'Active' where managerId = ?";
+        db.query(sqlQuery, [managerId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Manager Activated Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Manager Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Manager Found.",
+    });
+  }
+};
+
 // creating new Client
 module.exports.createNewClient = async (req, res) => {
   let client = req.body;
@@ -504,6 +867,80 @@ module.exports.createNewClient = async (req, res) => {
       });
     }
   });
+};
+
+module.exports.deleteClient = async (req, res) => {
+  let clientId = req.params.clientId;
+  if (clientId) {
+    let sqlQuery = "SELECT * FROM client where clientId = ?";
+    db.query(sqlQuery, [clientId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE client SET active = 'Deleted' where clientId = ?";
+        db.query(sqlQuery, [clientId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Client Deleted Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Client Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No Client Found.",
+    });
+  }
+};
+
+module.exports.activateClient = async (req, res) => {
+  let clientId = req.params.clientId;
+  if (clientId) {
+    let sqlQuery = "SELECT * FROM client where clientId = ?";
+    db.query(sqlQuery, [clientId], (err, result) => {
+      if (err) {
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+      }
+      if (result.length == 1) {
+        sqlQuery = "UPDATE client SET active = 'Active' where clientId = ?";
+        db.query(sqlQuery, [clientId], (err, result) => {
+          if (err) {
+            res.status(502).json({ success: false, error: toString(err) });
+          }
+          res.status(200).json({
+            success: true,
+            data: "Client Activated Successfully.",
+          });
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No Client Found.",
+        });
+      }
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No client Found.",
+    });
+  }
 };
 
 module.exports.logoutAdmin = async (req, res) => {
