@@ -12,7 +12,7 @@ const requireManagerAuth = async (req, res, next) => {
         });
       } else {
         let sqlQuery =
-          "SELECT * FROM manager WHERE managerId = ? where active = 'Active'";
+          "SELECT * FROM manager WHERE managerId = ? AND active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({

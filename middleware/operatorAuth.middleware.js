@@ -12,7 +12,7 @@ const requireOperatorAuth = async (req, res, next) => {
         });
       } else {
         let sqlQuery =
-          "SELECT * FROM operator WHERE operatorId = ? where active = 'Active'";
+          "SELECT * FROM operator WHERE operatorId = ? AND active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({

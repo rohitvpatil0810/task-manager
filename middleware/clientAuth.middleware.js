@@ -12,7 +12,7 @@ const requireClientAuth = async (req, res, next) => {
         });
       } else {
         let sqlQuery =
-          "SELECT * FROM client WHERE clientId = ? where active = 'Active'";
+          "SELECT * FROM client WHERE clientId = ? AND active = 'Active'";
         db.query(sqlQuery, [decodedToken.id], (error, result) => {
           if (error) {
             res.status(502).json({

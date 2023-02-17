@@ -60,7 +60,7 @@ module.exports.getProfilePic = async (req, res) => {
 // client login
 module.exports.loginClient = async (req, res) => {
   let { email, password } = req.body;
-  let sqlQuery = "SELECT * FROM client WHERE email = ?";
+  let sqlQuery = "SELECT * FROM client WHERE email = ? AND active = 'Active'";
   let value = [email];
   db.query(sqlQuery, [value], async (error, result) => {
     if (error) {
