@@ -370,7 +370,7 @@ module.exports.getDepartments = async (req, res) => {
 };
 
 module.exports.getClients = async (req, res) => {
-  let sqlQuery = "SELECT * FROM client";
+  let sqlQuery = "SELECT * FROM client WHERE active = 'Active'";
   db.query(sqlQuery, "", async (err, result) => {
     if (err) {
       res.status(502).json({
