@@ -9,7 +9,7 @@ let sqlQuery4 =
   "CREATE TABLE IF NOT EXISTS client (clientId VARCHAR(255) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), mobile VARCHAR(255), organization VARCHAR(255), password VARCHAR(255), active enum ('Active', 'Deleted') DEFAULT 'Active' );";
 
 let sqlQuery5 =
-  "CREATE TABLE IF NOT EXISTS department (departmentId VARCHAR(255) PRIMARY KEY, departmentName VARCHAR(255), managerId VARCHAR(255), FOREIGN KEY (managerId) REFERENCES manager(managerId));";
+  "CREATE TABLE IF NOT EXISTS department (departmentId VARCHAR(255) PRIMARY KEY, departmentName VARCHAR(255));";
 
 let sqlQuery6 =
   "CREATE TABLE IF NOT EXISTS operator (operatorId VARCHAR(255) PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), mobile VARCHAR(255), password VARCHAR(255), departmentId VARCHAR(255), active enum ('Active', 'Deleted') DEFAULT 'Active', FOREIGN KEY (departmentId) REFERENCES department(departmentId));";

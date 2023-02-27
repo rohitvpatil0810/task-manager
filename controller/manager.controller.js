@@ -174,7 +174,6 @@ module.exports.createNewDepartment = async (req, res) => {
     }
   }
   department.departmentId = generateId();
-  department.managerId = req.manager.managerId;
 
   let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
   db.query(sqlQuery, [department.name], (error, result) => {
@@ -185,14 +184,10 @@ module.exports.createNewDepartment = async (req, res) => {
       });
       return;
     }
-    let values = [
-      department.departmentId,
-      department.name,
-      department.managerId,
-    ];
+    let values = [department.departmentId, department.name];
     if (result.length == 0) {
       sqlQuery =
-        "INSERT INTO department (departmentId, departmentName, managerId) VALUES ?";
+        "INSERT INTO department (departmentId, departmentName) VALUES ?";
       db.query(sqlQuery, [[values]], (error, result) => {
         if (error) {
           res.status(502).json({
