@@ -32,41 +32,49 @@ module.exports.createNewProject = async (req, res) => {
         unlinkSync("./uploads/project/" + req.fileName);
       }
       if (result.length == 0) {
-        sharp("./uploads/project/" + req.fileName)
-          .toFormat("jpeg")
-          .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
-            if (err) {
-              console.log(1, err);
-              res.status(502).json({
-                success: false,
-                error: toString(err),
-              });
-              return;
-            } else {
-              unlinkSync("./uploads/project/" + req.fileName);
-              sqlQuery =
-                "INSERT INTO project (projectId, projectName) VALUES ?";
-              db.query(
-                sqlQuery,
-                [[[projectId, projectName]]],
-                (err, result) => {
-                  if (err) {
-                    console.log(2, err);
-                    unlinkSync("./uploads/project/" + projectId + ".jpeg");
-                    res.status(502).json({
-                      success: false,
-                      error: toString(err),
+        if (projectName.length >= 3) {
+          sharp("./uploads/project/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
+              if (err) {
+                console.log(1, err);
+                res.status(502).json({
+                  success: false,
+                  error: toString(err),
+                });
+                return;
+              } else {
+                unlinkSync("./uploads/project/" + req.fileName);
+                sqlQuery =
+                  "INSERT INTO project (projectId, projectName) VALUES ?";
+                db.query(
+                  sqlQuery,
+                  [[[projectId, projectName]]],
+                  (err, result) => {
+                    if (err) {
+                      console.log(2, err);
+                      unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                      res.status(502).json({
+                        success: false,
+                        error: toString(err),
+                      });
+                      return;
+                    }
+                    res.status(200).json({
+                      success: true,
+                      data: "Project Added Successfully.",
                     });
-                    return;
                   }
-                  res.status(200).json({
-                    success: true,
-                    data: "Project Added Successfully.",
-                  });
-                }
-              );
-            }
+                );
+              }
+            });
+        } else {
+          unlinkSync("./uploads/project/" + req.fileName);
+          res.status(400).json({
+            success: false,
+            error: "Project Name should be atleast 3 characters long.",
           });
+        }
       } else {
         unlinkSync("./uploads/project/" + req.fileName);
         res.status(403).json({
