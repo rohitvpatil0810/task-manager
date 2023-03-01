@@ -45,11 +45,7 @@ clientRouter.get(
   requireClientAuth,
   getAttachmentsByTaskId
 );
-clientRouter.post(
-  "/attachFiles/:taskId",
-  requireClientAuth,
-  attachDocumentsByTaskId
-);
+clientRouter.post("/attachFiles/:taskId", attachDocumentsByTaskId);
 clientRouter.get(
   "/getTimeline/:taskId",
   requireClientAuth,

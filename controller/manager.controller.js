@@ -10,6 +10,18 @@ const { existsSync, unlinkSync } = require("fs");
 const sharp = require("sharp");
 const { sendEmail } = require("../utility/sendEmail");
 
+const upload_departmentIcon = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/project");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("departmentIcon");
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
@@ -20,7 +32,7 @@ const upload = multer({
       cb(null, req.fileName);
     },
   }),
-}).single("profilePic");
+}).single("profilePic ");
 
 module.exports.uploadProfilePic = async (req, res) => {
   upload(req, res, async () => {
