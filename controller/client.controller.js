@@ -330,7 +330,7 @@ module.exports.attachDocumentsByTaskId = async (req, res) => {
 module.exports.trackYourTask = async (req, res) => {
   let id = req.client.clientId;
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE clientId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE clientId = ? ORDER BY closeDate DESC, openDate DESC ";
 
   db.query(sqlQuery, [id], async (error, result) => {
     if (error) {

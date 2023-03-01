@@ -282,7 +282,7 @@ module.exports.acceptTask = async (req, res) => {
 module.exports.taskByOperatorId = async (req, res) => {
   let operatorId = req.operator.operatorId;
   sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE operatorId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE operatorId = ? ORDER BY closeDate DESC, openDate DESC ";
   db.query(sqlQuery, [operatorId], async (error, result) => {
     if (error) {
       res.status(502).json({

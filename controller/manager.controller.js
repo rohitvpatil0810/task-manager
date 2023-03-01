@@ -666,7 +666,7 @@ module.exports.assignTask = async (req, res) => {
 module.exports.assignedTask = (req, res) => {
   let id = req.manager.managerId;
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE AssignationStatus = ? AND managerId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE AssignationStatus = ? AND managerId = ? ORDER BY closeDate DESC, openDate DESC ";
   let status = "Assigned";
   db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
@@ -686,7 +686,7 @@ module.exports.assignedTask = (req, res) => {
 module.exports.getTasks = (req, res) => {
   let id = req.manager.managerId;
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE managerId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE managerId = ? ORDER BY closeDate DESC, openDate DESC ";
   db.query(sqlQuery, [id], (error, result) => {
     if (error) {
       res.status(502).json({
@@ -704,7 +704,7 @@ module.exports.getTasks = (req, res) => {
 
 module.exports.notAssignedTask = async (req, res) => {
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE AssignationStatus = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE AssignationStatus = ? ORDER BY closeDate DESC, openDate DESC ";
   let status = "Pending";
   db.query(sqlQuery, [status], (error, result) => {
     if (error) {
@@ -724,7 +724,7 @@ module.exports.notAssignedTask = async (req, res) => {
 module.exports.inProgressTask = async (req, res) => {
   let id = req.manager.managerId;
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE taskStatus = ? AND managerId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE taskStatus = ? AND managerId = ? ORDER BY closeDate DESC, openDate DESC ";
   let status = "inProgress";
   db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
@@ -744,7 +744,7 @@ module.exports.inProgressTask = async (req, res) => {
 module.exports.completedTask = async (req, res) => {
   let id = req.manager.managerId;
   let sqlQuery =
-    "SELECT * FROM task NATURAL JOIN project ORDER BY closeDate DESC, openDate DESC WHERE taskStatus = ? AND managerId = ?";
+    "SELECT * FROM task NATURAL JOIN project WHERE taskStatus = ? AND managerId = ? ORDER BY closeDate DESC, openDate DESC ";
   let status = "Completed";
   db.query(sqlQuery, [status, id], (error, result) => {
     if (error) {
