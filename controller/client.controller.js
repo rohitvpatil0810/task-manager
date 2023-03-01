@@ -283,10 +283,9 @@ module.exports.getAttachmentsByTaskId = async (req, res) => {
 // attach documents links to a task by task Id
 module.exports.attachDocumentsByTaskId = async (req, res) => {
   let taskId = req.params.taskId;
-  let clientId = req.client.clientId;
   let { documentsList } = req.body;
-  let sqlQuery = "SELECT * FROM task WHERE taskId = ? AND clientId = ?";
-  db.query(sqlQuery, [taskId, clientId], (error, result) => {
+  let sqlQuery = "SELECT * FROM task WHERE taskId = ?";
+  db.query(sqlQuery, [taskId], (error, result) => {
     if (error) {
       res.status(502).json({
         success: false,
