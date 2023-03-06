@@ -1079,67 +1079,80 @@ module.exports.createNewAdmin = async (req, res) => {
 
 // creating new Manager
 module.exports.createNewManager = async (req, res) => {
-  let manager = req.body;
-  const check = checkUserData(manager);
-  if (!check.result) {
-    res.status(400).json({
-      success: false,
-      error: check.errors,
-    });
-    return;
-  }
-
-  manager.managerId = generateId();
-  let originalPassword = manager.password;
-  const newPassword = await hashPassword(manager.password);
-  manager.password = newPassword;
-  let values = [
-    manager.managerId,
-    manager.name,
-    manager.email,
-    manager.mobile,
-    manager.password,
-  ];
-  let sqlQuery = "SELECT * FROM manager where email = ? OR mobile = ?";
-  db.query(sqlQuery, [manager.email, manager.mobile], (error, result) => {
-    if (error) {
-      res.status(502).json({
+  uploadTo(req, res, async () => {
+    let manager = req.body;
+    const check = checkUserData(manager);
+    if (!check.result) {
+      unlinkSync("./uploads/manager/" + req.fileName);
+      res.status(400).json({
         success: false,
-        error: "Internal Server Error.",
+        error: check.errors,
       });
       return;
     }
-    if (result.length == 0) {
-      sqlQuery =
-        "INSERT INTO manager (managerId, name, email, mobile, password) VALUES ?";
-      db.query(sqlQuery, [[values]], (error, result) => {
-        if (error) {
-          res.status(502).json({
-            success: false,
-            error: "Internal Server Error.",
-          });
-          return;
-        } else {
-          let sendOptions = {
-            name: manager.name,
-            email: manager.email,
-            password: originalPassword,
-            role: "Manager",
-          };
-          sendEmail(sendOptions);
-          res.status(200).json({
-            success: true,
-            data: "Manager created successfully.",
-          });
-        }
-      });
-    } else {
-      res.status(409).json({
-        success: false,
-        error:
-          "Manager is already present on system with this mobile number or email.",
-      });
-    }
+
+    manager.managerId = generateId();
+    let originalPassword = manager.password;
+    const newPassword = await hashPassword(manager.password);
+    manager.password = newPassword;
+    let values = [
+      manager.managerId,
+      manager.name,
+      manager.email,
+      manager.mobile,
+      manager.password,
+    ];
+    let sqlQuery = "SELECT * FROM manager where email = ? OR mobile = ?";
+    db.query(sqlQuery, [manager.email, manager.mobile], (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/manager/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error.",
+        });
+        return;
+      }
+      if (result.length == 0) {
+        sharp("./uploads/manager/" + req.fileName)
+          .toFormat("jpeg")
+          .toFile(
+            "./uploads/manager/" + manager.managerId + ".jpeg",
+            (err, info) => {
+              sqlQuery =
+                "INSERT INTO manager (managerId, name, email, mobile, password) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  unlinkSync("./uploads/manager/" + req.fileName);
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error.",
+                  });
+                  return;
+                } else {
+                  let sendOptions = {
+                    name: manager.name,
+                    email: manager.email,
+                    password: originalPassword,
+                    role: "Manager",
+                  };
+                  sendEmail(sendOptions);
+                  res.status(200).json({
+                    success: true,
+                    data: "Manager created successfully.",
+                  });
+                }
+              });
+            }
+          );
+      } else {
+        unlinkSync("./uploads/manager/" + req.fileName);
+        res.status(409).json({
+          success: false,
+          error:
+            "Manager is already present on system with this mobile number or email.",
+        });
+      }
+    });
   });
 };
 

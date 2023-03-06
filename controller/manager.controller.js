@@ -32,7 +32,19 @@ const upload = multer({
       cb(null, req.fileName);
     },
   }),
-}).single("profilePic ");
+}).single("profilePic");
+
+const uploadToOperator = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/operator");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = req.manager.managerId + path.extname(file.originalname);
+      cb(null, req.fileName);
+    },
+  }),
+}).single("operatorIcon");
 
 module.exports.uploadProfilePic = async (req, res) => {
   upload(req, res, async () => {
@@ -201,7 +213,7 @@ module.exports.createNewDepartment = async (req, res) => {
       }
       let values = [department.departmentId, department.name];
       if (result.length == 0) {
-        sharp("./uploads/client/" + req.fileName)
+        sharp("./uploads/department/" + req.fileName)
           .toFormat("jpeg")
           .toFile(
             "./uploads/department/" + department.departmentId + ".jpeg",
@@ -238,101 +250,117 @@ module.exports.createNewDepartment = async (req, res) => {
 
 // Creating new Operator/Resource
 module.exports.createNewOperator = async (req, res) => {
-  let operator = req.body;
-  if (operator && !operator.departmentId) {
-    res.status(502).json({
-      success: false,
-      error: "Something went wrong. Please try again.",
-    });
-    return;
-  }
-  let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
-  if (operator && operator.departmentId) {
-    db.query(sqlQuery, [operator.departmentId], async (error, result) => {
-      if (error) {
-        res.status(502).json({
-          success: false,
-          error: "Internal Server Error",
-        });
-        return;
-      }
-      if (result.length == 0) {
-        res.status(502).json({
-          success: false,
-          error: "Something went wrong. Please try again.",
-        });
-        return;
-      } else {
-        const check = checkUserData(operator);
-        if (!check.result) {
-          res.status(400).json({
+  uploadToOperator(req, res, async () => {
+    let operator = req.body;
+    if (operator && !operator.departmentId) {
+      unlinkSync("./uploads/operator/" + req.fileName);
+      res.status(502).json({
+        success: false,
+        error: "Something went wrong. Please try again.",
+      });
+      return;
+    }
+    let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
+    if (operator && operator.departmentId) {
+      db.query(sqlQuery, [operator.departmentId], async (error, result) => {
+        if (error) {
+          unlinkSync("./uploads/operator/" + req.fileName);
+          res.status(502).json({
             success: false,
-            error: check.errors,
+            error: "Internal Server Error",
           });
           return;
         }
-
-        operator.operatorId = generateId();
-        let originalPassword = operator.password;
-        const newPassword = await hashPassword(operator.password);
-        operator.password = newPassword;
-        let values = [
-          operator.operatorId,
-          operator.name,
-          operator.email,
-          operator.mobile,
-          operator.password,
-          operator.departmentId,
-          "Active",
-        ];
-        sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
-        db.query(
-          sqlQuery,
-          [operator.email, operator.mobile],
-          (error, result) => {
-            if (error) {
-              res.status(502).json({
-                success: false,
-                error: "Internal Server Error.",
-              });
-              return;
-            }
-            if (result.length == 0) {
-              sqlQuery =
-                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
-              db.query(sqlQuery, [[values]], (error, result) => {
-                if (error) {
-                  res.status(502).json({
-                    success: false,
-                    error: "Internal Server Error.",
-                  });
-                  return;
-                } else {
-                  let sendOptions = {
-                    name: operator.name,
-                    email: operator.email,
-                    password: originalPassword,
-                    role: "Operator",
-                  };
-                  sendEmail(sendOptions);
-                  res.status(200).json({
-                    success: true,
-                    data: "Operator created successfully.",
-                  });
-                }
-              });
-            } else {
-              res.status(409).json({
-                success: false,
-                error:
-                  "Operator is already present on system with this mobile number or email.",
-              });
-            }
+        if (result.length == 0) {
+          unlinkSync("./uploads/operator/" + req.fileName);
+          res.status(502).json({
+            success: false,
+            error: "Something went wrong. Please try again.",
+          });
+          return;
+        } else {
+          const check = checkUserData(operator);
+          if (!check.result) {
+            unlinkSync("./uploads/operator/" + req.fileName);
+            res.status(400).json({
+              success: false,
+              error: check.errors,
+            });
+            return;
           }
-        );
-      }
-    });
-  }
+
+          operator.operatorId = generateId();
+          let originalPassword = operator.password;
+          const newPassword = await hashPassword(operator.password);
+          operator.password = newPassword;
+          let values = [
+            operator.operatorId,
+            operator.name,
+            operator.email,
+            operator.mobile,
+            operator.password,
+            operator.departmentId,
+            "Active",
+          ];
+          sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
+          db.query(
+            sqlQuery,
+            [operator.email, operator.mobile],
+            (error, result) => {
+              if (error) {
+                unlinkSync("./uploads/operator/" + req.fileName);
+                res.status(502).json({
+                  success: false,
+                  error: "Internal Server Error.",
+                });
+                return;
+              }
+              if (result.length == 0) {
+                sharp("./uploads/operator/" + req.fileName)
+                  .toFormat("jpeg")
+                  .toFile(
+                    "./uploads/operator/" + operator.operatorId + ".jpeg",
+                    (err, info) => {
+                      sqlQuery =
+                        "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
+                      db.query(sqlQuery, [[values]], (error, result) => {
+                        if (error) {
+                          unlinkSync("./uploads/operator/" + req.fileName);
+                          res.status(502).json({
+                            success: false,
+                            error: "Internal Server Error.",
+                          });
+                          return;
+                        } else {
+                          let sendOptions = {
+                            name: operator.name,
+                            email: operator.email,
+                            password: originalPassword,
+                            role: "Operator",
+                          };
+                          sendEmail(sendOptions);
+                          res.status(200).json({
+                            success: true,
+                            data: "Operator created successfully.",
+                          });
+                        }
+                      });
+                    }
+                  );
+              } else {
+                unlinkSync("./uploads/operator/" + req.fileName);
+                res.status(409).json({
+                  success: false,
+                  error:
+                    "Operator is already present on system with this mobile number or email.",
+                });
+              }
+            }
+          );
+        }
+      });
+    }
+  });
 };
 
 // delete an operator
