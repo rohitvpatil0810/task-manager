@@ -433,7 +433,7 @@ module.exports.addDepartment = async (req, res) => {
 
 module.exports.editDepartment = async (req, res) => {
   uploadToDepartment(req, res, async () => {
-    const departmentId = req.params;
+    const departmentId = req.params.departmentId;
     const departmentName = req.body.departmentName;
     let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
     db.query(sqlQuery, [departmentName], (err, result) => {
@@ -455,47 +455,64 @@ module.exports.editDepartment = async (req, res) => {
             });
             return;
           }
-          sharp("./uploads/department/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile(
-              "./uploads/department/" + departmentId + ".jpeg",
-              (err, info) => {
-                if (err) {
-                  unlinkSync("./uploads/department/" + req.fileName);
-                  console.log(1, err);
-                  res.status(502).json({
-                    success: false,
-                    error: toString(err),
-                  });
-                  return;
-                } else {
-                  unlinkSync("./uploads/department/" + req.fileName);
-                  sqlQuery =
-                    "UPDATE department SET departmentName = ? WHERE departmentId = ?";
-                  db.query(
-                    sqlQuery,
-                    [departmentName, departmentId],
-                    (err, result) => {
-                      if (err) {
-                        console.log(2, err);
-                        unlinkSync(
-                          "./uploads/department/" + departmentId + ".jpeg"
-                        );
-                        res.status(502).json({
-                          success: false,
-                          error: toString(err),
+          if (result.length == 1) {
+            if (!departmentName || departmentName.length < 3) {
+              unlinkSync("./uploads/department/" + req.fileName);
+              res.status(400).json({
+                success: false,
+                error: "Department Name Cannot be less than 3 characters",
+              });
+              return;
+            }
+            sharp("./uploads/department/" + req.fileName)
+              .toFormat("jpeg")
+              .toFile(
+                "./uploads/department/" + departmentId + ".jpeg",
+                (err, info) => {
+                  if (err) {
+                    unlinkSync("./uploads/department/" + req.fileName);
+                    console.log(1, err);
+                    res.status(502).json({
+                      success: false,
+                      error: toString(err),
+                    });
+                    return;
+                  } else {
+                    unlinkSync("./uploads/department/" + req.fileName);
+                    sqlQuery =
+                      "UPDATE department SET departmentName = ? WHERE departmentId = ?";
+                    db.query(
+                      sqlQuery,
+                      [departmentName, departmentId],
+                      (err, result) => {
+                        if (err) {
+                          console.log(2, err);
+                          unlinkSync(
+                            "./uploads/department/" + departmentId + ".jpeg"
+                          );
+                          res.status(502).json({
+                            success: false,
+                            error: toString(err),
+                          });
+                          return;
+                        }
+                        res.status(200).json({
+                          success: true,
+                          data: "department Edited Successfully.",
                         });
-                        return;
                       }
-                      res.status(200).json({
-                        success: true,
-                        data: "department Edited Successfully.",
-                      });
-                    }
-                  );
+                    );
+                  }
                 }
-              }
-            );
+              );
+          } else {
+            unlinkSync("./uploads/department/" + req.fileName);
+            res.status(404).json({
+              success: false,
+              error: "Department does not exists",
+            });
+            return;
+          }
         });
       } else {
         unlinkSync("./uploads/department/" + departmentId + ".jpeg");
