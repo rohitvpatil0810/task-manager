@@ -73,7 +73,7 @@ const uploadToDepartment = multer({
 module.exports.editManager = async (req, res) => {
   uploadTo(req, res, async () => {
     const manager = req.body;
-    const managerId = req.params;
+    const managerId = req.params.managerId;
     let sqlQuery = "SELECT * FROM manager WHERE managerId = ?";
     db.query(sqlQuery, [managerId], async (error, result) => {
       if (error) {
@@ -137,11 +137,13 @@ module.exports.editManager = async (req, res) => {
 module.exports.editOperator = async (req, res) => {
   uploadToOperator(req, res, async () => {
     const operator = req.body;
-    const operatorId = req.params;
+    const operatorId = req.params.operatorId;
     let sqlQuery = "SELECT * FROM operator WHERE operatorId = ?";
     db.query(sqlQuery, [operatorId], async (error, result) => {
       if (error) {
-        unlinkSync("./uploads/operator/" + req.fileName);
+        if (existsSync("./uploads/operator/" + req.fileName)) {
+          unlinkSync("./uploads/operator/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: toString(err),
@@ -167,34 +169,47 @@ module.exports.editOperator = async (req, res) => {
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
-            unlinkSync("./uploads/operator/" + req.fileName);
+            if (existsSync("./uploads/operator/" + req.fileName)) {
+              unlinkSync("./uploads/operator/" + req.fileName);
+            }
             res.status(502).json({
               success: false,
               error: toString(err),
             });
             return;
           }
-          sharp("./uploads/operator/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile(
-              "./uploads/operator/" + operatorId + ".jpeg",
-              (err, info) => {
-                if (err) {
-                  unlinkSync("./uploads/operator/" + req.fileName);
-                  res.status(502).json({
-                    success: false,
-                    error: toString(err),
-                  });
-                  return;
-                } else {
-                  unlinkSync("./uploads/operator/" + req.fileName);
-                  res.status(200).json({
-                    success: true,
-                    data: "operator Edited Successfully",
-                  });
+          if (existsSync("./uploads/operator/" + req.fileName)) {
+            sharp("./uploads/operator/" + req.fileName)
+              .toFormat("jpeg")
+              .toFile(
+                "./uploads/operator/" + operatorId + ".jpeg",
+                (err, info) => {
+                  if (err) {
+                    if (existsSync("./uploads/operator/" + req.fileName)) {
+                      unlinkSync("./uploads/operator/" + req.fileName);
+                    }
+                    res.status(502).json({
+                      success: false,
+                      error: toString(err),
+                    });
+                    return;
+                  } else {
+                    if (existsSync("./uploads/operator/" + req.fileName)) {
+                      unlinkSync("./uploads/operator/" + req.fileName);
+                    }
+                    res.status(200).json({
+                      success: true,
+                      data: "operator Edited Successfully",
+                    });
+                  }
                 }
-              }
-            );
+              );
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "operator Edited Successfully",
+            });
+          }
         });
       }
     });
