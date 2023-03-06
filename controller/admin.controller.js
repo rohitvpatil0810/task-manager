@@ -280,62 +280,71 @@ module.exports.editProject = async (req, res) => {
         return;
       } else if (result.length == 0) {
         sqlQuery = "SELECT * FROM project WHERE projectId = ?";
-        db.query(sqlQuery, [projectId], (err, result) => {
-          if (err) {
-            unlinkSync("./uploads/project/" + req.fileName);
-            res.status(502).json({
-              success: false,
-              error: toString(err),
-            });
-            return;
-          }
-          if (result.length == 1) {
-            sharp("./uploads/project/" + req.fileName)
-              .toFormat("jpeg")
-              .toFile(
-                "./uploads/project/" + projectId + ".jpeg",
-                (err, info) => {
-                  if (err) {
-                    unlinkSync("./uploads/project/" + req.fileName);
-                    console.log(1, err);
-                    res.status(502).json({
-                      success: false,
-                      error: toString(err),
-                    });
-                    return;
-                  } else {
-                    unlinkSync("./uploads/project/" + req.fileName);
-                    sqlQuery =
-                      "UPDATE project SET projectName = ? WHERE projectId = ?";
-                    db.query(
-                      sqlQuery,
-                      [projectName, projectId],
-                      (err, result) => {
-                        if (err) {
-                          console.log(2, err);
-                          res.status(502).json({
-                            success: false,
-                            error: toString(err),
+        if (projectName.length)
+          db.query(sqlQuery, [projectId], (err, result) => {
+            if (err) {
+              unlinkSync("./uploads/project/" + req.fileName);
+              res.status(502).json({
+                success: false,
+                error: toString(err),
+              });
+              return;
+            }
+            if (result.length == 1) {
+              if (!projectName || projectName.length < 3) {
+                unlinkSync("./uploads/project/" + req.fileName);
+                res.status(502).json({
+                  success: false,
+                  error: "Project Name should be atleast 3 characters long.",
+                });
+                return;
+              }
+              sharp("./uploads/project/" + req.fileName)
+                .toFormat("jpeg")
+                .toFile(
+                  "./uploads/project/" + projectId + ".jpeg",
+                  (err, info) => {
+                    if (err) {
+                      unlinkSync("./uploads/project/" + req.fileName);
+                      console.log(1, err);
+                      res.status(502).json({
+                        success: false,
+                        error: toString(err),
+                      });
+                      return;
+                    } else {
+                      unlinkSync("./uploads/project/" + req.fileName);
+                      sqlQuery =
+                        "UPDATE project SET projectName = ? WHERE projectId = ?";
+                      db.query(
+                        sqlQuery,
+                        [projectName, projectId],
+                        (err, result) => {
+                          if (err) {
+                            console.log(2, err);
+                            res.status(502).json({
+                              success: false,
+                              error: toString(err),
+                            });
+                            return;
+                          }
+                          res.status(200).json({
+                            success: true,
+                            data: "Project Edited Successfully.",
                           });
-                          return;
                         }
-                        res.status(200).json({
-                          success: true,
-                          data: "Project Edited Successfully.",
-                        });
-                      }
-                    );
+                      );
+                    }
                   }
-                }
-              );
-          } else {
-            unlinkSync("./uploads/project/" + req.fileName);
-            res.status(502).json({
-              success: false,
-              error: "Project doesnot exists",
-            });
-          }
-        });
+                );
+            } else {
+              unlinkSync("./uploads/project/" + req.fileName);
+              res.status(502).json({
+                success: false,
+                error: "Project doesnot exists",
+              });
+            }
+          });
       } else {
         unlinkSync("./uploads/project/" + req.fileName);
         res.status(502).json({
