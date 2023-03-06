@@ -22,7 +22,7 @@ const upload = multer({
   }),
 }).single("projectIcon");
 
-const uploadTo = multer({
+const uploadToManager = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, "uploads/manager");
@@ -71,13 +71,15 @@ const uploadToDepartment = multer({
 }).single("departmentIcon");
 
 module.exports.editManager = async (req, res) => {
-  uploadTo(req, res, async () => {
+  uploadToManager(req, res, async () => {
     const manager = req.body;
     const managerId = req.params.managerId;
     let sqlQuery = "SELECT * FROM manager WHERE managerId = ?";
     db.query(sqlQuery, [managerId], async (error, result) => {
       if (error) {
-        unlinkSync("./uploads/manager/" + req.fileName);
+        if (existsSync("./uploads/manager/" + req.fileName)) {
+          unlinkSync("./uploads/manager/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: toString(err),
@@ -103,31 +105,43 @@ module.exports.editManager = async (req, res) => {
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
-            unlinkSync("./uploads/manager/" + req.fileName);
+            if (existsSync("./uploads/manager/" + req.fileName)) {
+              unlinkSync("./uploads/manager/" + req.fileName);
+            }
             res.status(502).json({
               success: false,
               error: toString(err),
             });
             return;
           }
-          sharp("./uploads/manager/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile("./uploads/manager/" + managerId + ".jpeg", (err, info) => {
-              if (err) {
-                unlinkSync("./uploads/manager/" + req.fileName);
-                res.status(502).json({
-                  success: false,
-                  error: toString(err),
-                });
-                return;
-              } else {
-                unlinkSync("./uploads/manager/" + req.fileName);
-                res.status(200).json({
-                  success: true,
-                  data: "Manager Edited Successfully",
-                });
-              }
+          if (existsSync("./uploads/manager/" + req.fileName)) {
+            sharp("./uploads/manager/" + req.fileName)
+              .toFormat("jpeg")
+              .toFile(
+                "./uploads/manager/" + managerId + ".jpeg",
+                (err, info) => {
+                  if (err) {
+                    unlinkSync("./uploads/manager/" + req.fileName);
+                    res.status(502).json({
+                      success: false,
+                      error: toString(err),
+                    });
+                    return;
+                  } else {
+                    unlinkSync("./uploads/manager/" + req.fileName);
+                    res.status(200).json({
+                      success: true,
+                      data: "Manager Edited Successfully",
+                    });
+                  }
+                }
+              );
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "Manager Edited Successfully",
             });
+          }
         });
       }
     });
