@@ -13,7 +13,7 @@ const { sendEmail } = require("../utility/sendEmail");
 const upload_departmentIcon = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, "uploads/project");
+      cb(null, "uploads/department");
     },
     filename: function (req, file, cb) {
       req.fileName = file.originalname;
@@ -169,57 +169,70 @@ module.exports.getManagerProfile = async (req, res) => {
 
 // Creating new Department
 module.exports.createNewDepartment = async (req, res) => {
-  const department = req.body;
-  if (!department.name) {
-    res.status(400).json({
-      success: false,
-      error: "Please Enter Department name.",
-    });
-    return;
-  } else {
-    if (department.name.length < 3) {
+  upload_departmentIcon(req, res, async () => {
+    const department = req.body;
+    if (!department.name) {
       res.status(400).json({
         success: false,
-        error: "Department name must contain at least 3 characters.",
+        error: "Please Enter Department name.",
       });
       return;
-    }
-  }
-  department.departmentId = generateId();
-
-  let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
-  db.query(sqlQuery, [department.name], (error, result) => {
-    if (error) {
-      res.status(502).json({
-        success: false,
-        error: "Internal Server Error.",
-      });
-      return;
-    }
-    let values = [department.departmentId, department.name];
-    if (result.length == 0) {
-      sqlQuery =
-        "INSERT INTO department (departmentId, departmentName) VALUES ?";
-      db.query(sqlQuery, [[values]], (error, result) => {
-        if (error) {
-          res.status(502).json({
-            success: false,
-            error: "Internal Server Error.",
-          });
-          return;
-        } else {
-          res.status(200).json({
-            success: true,
-            data: "Department created successfully.",
-          });
-        }
-      });
     } else {
-      res.status(409).json({
-        success: false,
-        error: "Department is already present on system with this name.",
-      });
+      if (department.name.length < 3) {
+        unlinkSync("./uploads/department/" + req.fileName);
+        res.status(400).json({
+          success: false,
+          error: "Department name must contain at least 3 characters.",
+        });
+        return;
+      }
     }
+    department.departmentId = generateId();
+
+    let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
+    db.query(sqlQuery, [department.name], (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/department/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: "Internal Server Error.",
+        });
+        return;
+      }
+      let values = [department.departmentId, department.name];
+      if (result.length == 0) {
+        sharp("./uploads/client/" + req.fileName)
+          .toFormat("jpeg")
+          .toFile(
+            "./uploads/department/" + department.departmentId + ".jpeg",
+            (err, info) => {
+              sqlQuery =
+                "INSERT INTO department (departmentId, departmentName) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  unlinkSync("./uploads/department/" + req.fileName);
+                  res.status(502).json({
+                    success: false,
+                    error: "Internal Server Error.",
+                  });
+                  return;
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "Department created successfully.",
+                  });
+                }
+              });
+            }
+          );
+      } else {
+        unlinkSync("./uploads/department/" + req.fileName);
+        res.status(409).json({
+          success: false,
+          error: "Department is already present on system with this name.",
+        });
+      }
+    });
   });
 };
 

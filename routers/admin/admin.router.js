@@ -32,6 +32,9 @@ const {
   editManager,
   editClient,
   editOperator,
+  addDepartment,
+  editProject,
+  editDepartment,
 } = require("../../controller/admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
@@ -55,6 +58,7 @@ adminRouter.get(
   getDeactivatedProjects
 );
 adminRouter.get("/getProjectIcon/:projectId", getProjectIcon);
+adminRouter.post("/editProject/:projectId", requireAdminAuth, editProject);
 
 // profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
@@ -109,8 +113,16 @@ adminRouter.get(
 //admin routes for editing users
 
 adminRouter.post("/editManager/:managerId", requireAdminAuth, editManager);
-adminRouter.post("editClient/:clientId" / requireAdminAuth, editClient);
+adminRouter.post("/editClient/:clientId", requireAdminAuth, editClient);
 adminRouter.post("editOperator/:operatorId", requireAdminAuth, editOperator);
+
+//admin Routes for departments
+adminRouter.post("/addDepartment", requireAdminAuth, addDepartment);
+adminRouter.post(
+  "/editDepartment/:departmentId",
+  requireAdminAuth,
+  editDepartment
+);
 
 // admin routes for login and logout
 adminRouter.get("/profile", requireAdminAuth, getAdminProfile);

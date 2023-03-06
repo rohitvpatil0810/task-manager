@@ -2,6 +2,8 @@ const { Router } = require("express");
 const {
   getOperatorProfilePic,
   getClientProfilePic,
+  editOperator,
+  editDepartment,
 } = require("../../controller/admin.controller");
 const {
   loginManager,
@@ -89,6 +91,9 @@ managerRouter.get("/assignedTask", requireManagerAuth, assignedTask);
 managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
 managerRouter.get("/completedTask", requireManagerAuth, completedTask);
+
+managerRouter.post("/editOpertor", requireManagerAuth, editOperator);
+
 managerRouter.get(
   "/getTimeline/:taskId",
   requireManagerAuth,
@@ -106,4 +111,9 @@ managerRouter.post(
   attachDocumentsByTaskId
 );
 managerRouter.post("/approveTask/:id", requireManagerAuth, approveTask);
+managerRouter.post(
+  "/editDepartment/:departmentId",
+  requireManagerAuth,
+  editDepartment
+);
 module.exports = managerRouter;

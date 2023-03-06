@@ -9,6 +9,7 @@ const { sendEmail } = require("../utility/sendEmail");
 const multer = require("multer");
 const path = require("path");
 const sharp = require("sharp");
+const { assert } = require("console");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -58,6 +59,18 @@ const uploadToOperator = multer({
   }),
 }).single("operatorIcon");
 
+const uploadToDepartment = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/department");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("departmentIcon");
+
 module.exports.editManager = async (req, res) => {
   uploadTo(req, res, async () => {
     const manager = req.body;
@@ -76,16 +89,18 @@ module.exports.editManager = async (req, res) => {
         if (manager.password) {
           manager.password = await hashPassword(manager.password);
           sqlQuery =
-            "UPDATE manager SET name = ? , email = ? , mobile = ? , password = ?";
+            "UPDATE manager SET name = ? , email = ? , mobile = ? , password = ? WHERE managerId = ?";
           values = [
             manager.name,
             manager.email,
             manager.mobile,
             manager.password,
+            managerId,
           ];
         } else {
-          sqlQuery = "UPDATE manager SET name = ? , email = ? , mobile = ?";
-          values = [manager.name, manager.email, manager.mobile];
+          sqlQuery =
+            "UPDATE manager SET name = ? , email = ? , mobile = ? WHERE managerId = ?";
+          values = [manager.name, manager.email, manager.mobile, managerId];
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
@@ -138,16 +153,18 @@ module.exports.editOperator = async (req, res) => {
         if (operator.password) {
           operator.password = await hashPassword(operator.password);
           sqlQuery =
-            "UPDATE operator SET name = ? , email = ? , mobile = ? , password = ?";
+            "UPDATE operator SET name = ? , email = ? , mobile = ? , password = ? WHERE operatorId = ?";
           values = [
             operator.name,
             operator.email,
             operator.mobile,
             operator.password,
+            operatorId,
           ];
         } else {
-          sqlQuery = "UPDATE operator SET name = ? , email = ? , mobile = ?";
-          values = [operator.name, operator.email, operator.mobile];
+          sqlQuery =
+            "UPDATE operator SET name = ? , email = ? , mobile = ? WHERE operatorId = ?";
+          values = [operator.name, operator.email, operator.mobile, operatorId];
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
@@ -203,11 +220,18 @@ module.exports.editClient = async (req, res) => {
         if (client.password) {
           client.password = await hashPassword(client.password);
           sqlQuery =
-            "UPDATE client SET name = ? , email = ? , mobile = ? , password = ?";
-          values = [client.name, client.email, client.mobile, client.password];
+            "UPDATE client SET name = ? , email = ? , mobile = ? , password = ? WHERE clientId = ?";
+          values = [
+            client.name,
+            client.email,
+            client.mobile,
+            client.password,
+            clientId,
+          ];
         } else {
-          sqlQuery = "UPDATE client SET name = ? , email = ? , mobile = ?";
-          values = [client.name, client.email, client.mobile];
+          sqlQuery =
+            "UPDATE client SET name = ? , email = ? , mobile = ? WHERE clientId = ?";
+          values = [client.name, client.email, client.mobile, clientId];
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
@@ -242,10 +266,10 @@ module.exports.editClient = async (req, res) => {
   });
 };
 
-module.exports.createNewProject = async (req, res) => {
+module.exports.editProject = async (req, res) => {
   upload(req, res, async () => {
+    const projectId = req.params;
     const projectName = req.body.projectName;
-    const projectId = generateId();
     let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
     db.query(sqlQuery, [projectName], (err, result) => {
       if (err) {
@@ -255,9 +279,17 @@ module.exports.createNewProject = async (req, res) => {
           error: toString(err),
         });
         return;
-      }
-      if (result.length == 0) {
-        if (projectName.length >= 3) {
+      } else if (result.length == 0) {
+        sqlQuery = "SELECT * FROM project WHERE projectId = ?";
+        db.query(sqlQuery, [projectId], (err, result) => {
+          if (err) {
+            unlinkSync("./uploads/project/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
           sharp("./uploads/project/" + req.fileName)
             .toFormat("jpeg")
             .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
@@ -272,41 +304,184 @@ module.exports.createNewProject = async (req, res) => {
               } else {
                 unlinkSync("./uploads/project/" + req.fileName);
                 sqlQuery =
-                  "INSERT INTO project (projectId, projectName) VALUES ?";
-                db.query(
-                  sqlQuery,
-                  [[[projectId, projectName]]],
-                  (err, result) => {
-                    if (err) {
-                      console.log(2, err);
-                      unlinkSync("./uploads/project/" + projectId + ".jpeg");
-                      res.status(502).json({
-                        success: false,
-                        error: toString(err),
-                      });
-                      return;
-                    }
-                    res.status(200).json({
-                      success: true,
-                      data: "Project Added Successfully.",
+                  "UPDATE project SET projectName = ? WHERE projectId = ?";
+                db.query(sqlQuery, [projectName, projectId], (err, result) => {
+                  if (err) {
+                    console.log(2, err);
+                    unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                    res.status(502).json({
+                      success: false,
+                      error: toString(err),
                     });
+                    return;
                   }
-                );
+                  res.status(200).json({
+                    success: true,
+                    data: "Project Edited Successfully.",
+                  });
+                });
               }
             });
+        });
+      } else {
+        unlinkSync("./uploads/project/" + projectId + ".jpeg");
+        res.status(502).json({
+          success: false,
+          data: "Project Name already exists",
+        });
+      }
+    });
+  });
+};
+
+module.exports.addDepartment = async (req, res) => {
+  uploadToDepartment(req, res, async () => {
+    const departmentName = req.body.departmentName;
+    const departmentId = generateId();
+    let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
+    db.query(sqlQuery, [departmentName], (err, result) => {
+      if (err) {
+        unlinkSync("./uploads/department/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      }
+      if (result.length == 0) {
+        if (departmentName.length >= 3) {
+          sharp("./uploads/department/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile(
+              "./uploads/department/" + departmentId + ".jpeg",
+              (err, info) => {
+                if (err) {
+                  unlinkSync("./uploads/project/" + req.fileName);
+                  console.log(1, err);
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                } else {
+                  unlinkSync("./uploads/department/" + req.fileName);
+                  sqlQuery =
+                    "INSERT INTO department (departmentId, departmentName) VALUES ?";
+                  db.query(
+                    sqlQuery,
+                    [[[departmentId, departmentName]]],
+                    (err, result) => {
+                      if (err) {
+                        console.log(2, err);
+                        unlinkSync(
+                          "./uploads/department/" + departmentId + ".jpeg"
+                        );
+                        res.status(502).json({
+                          success: false,
+                          error: toString(err),
+                        });
+                        return;
+                      }
+                      res.status(200).json({
+                        success: true,
+                        data: "Department Added Successfully.",
+                      });
+                    }
+                  );
+                }
+              }
+            );
         } else {
-          unlinkSync("./uploads/project/" + req.fileName);
+          unlinkSync("./uploads/department/" + req.fileName);
           res.status(400).json({
             success: false,
-            error: "Project Name should be atleast 3 characters long.",
+            error: "department Name should be atleast 3 characters long.",
           });
         }
       } else {
-        unlinkSync("./uploads/project/" + req.fileName);
+        unlinkSync("./uploads/department/" + req.fileName);
         res.status(403).json({
           success: false,
-          error: "Project Already Exists in system with same name.",
+          error: "department Already Exists in system with same name.",
         });
+      }
+    });
+  });
+};
+
+module.exports.editDepartment = async (req, res) => {
+  uploadToDepartment(req, res, async () => {
+    const departmentId = req.params;
+    const departmentName = req.body.departmentName;
+    let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
+    db.query(sqlQuery, [departmentName], (err, result) => {
+      if (err) {
+        unlinkSync("./uploads/department/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      } else if (result.length == 0) {
+        sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
+        db.query(sqlQuery, [departmentId], (err, result) => {
+          if (err) {
+            unlinkSync("./uploads/department/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
+          sharp("./uploads/department/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile(
+              "./uploads/department/" + departmentId + ".jpeg",
+              (err, info) => {
+                if (err) {
+                  unlinkSync("./uploads/department/" + req.fileName);
+                  console.log(1, err);
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                } else {
+                  unlinkSync("./uploads/department/" + req.fileName);
+                  sqlQuery =
+                    "UPDATE department SET departmentName = ? WHERE departmentId = ?";
+                  db.query(
+                    sqlQuery,
+                    [departmentName, departmentId],
+                    (err, result) => {
+                      if (err) {
+                        console.log(2, err);
+                        unlinkSync(
+                          "./uploads/department/" + departmentId + ".jpeg"
+                        );
+                        res.status(502).json({
+                          success: false,
+                          error: toString(err),
+                        });
+                        return;
+                      }
+                      res.status(200).json({
+                        success: true,
+                        data: "department Edited Successfully.",
+                      });
+                    }
+                  );
+                }
+              }
+            );
+        });
+      } else {
+        unlinkSync("./uploads/department/" + departmentId + ".jpeg");
+        res.status(502).json({
+          success: false,
+          data: "Department Already exists",
+        });
+        return;
       }
     });
   });
@@ -601,101 +776,117 @@ module.exports.getDeactivatedOperators = async (req, res) => {
 };
 
 module.exports.createNewOperator = async (req, res) => {
-  let operator = req.body;
-  if (operator && !operator.departmentId) {
-    res.status(502).json({
-      success: false,
-      error: "Something went wrong. Please try again.",
-    });
-    return;
-  }
-  let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
-  if (operator && operator.departmentId) {
-    db.query(sqlQuery, [operator.departmentId], async (error, result) => {
-      if (error) {
-        res.status(502).json({
-          success: false,
-          error: "Internal Server Error",
-        });
-        return;
-      }
-      if (result.length == 0) {
-        res.status(502).json({
-          success: false,
-          error: "Something went wrong. Please try again.",
-        });
-        return;
-      } else {
-        const check = checkUserData(operator);
-        if (!check.result) {
-          res.status(400).json({
+  uploadToOperator(req, res, async () => {
+    let operator = req.body;
+    if (operator && !operator.departmentId) {
+      unlinkSync("./uploads/operator/" + req.fileName);
+      res.status(502).json({
+        success: false,
+        error: "Something went wrong. Please try again.",
+      });
+      return;
+    }
+    let sqlQuery = "SELECT * FROM department WHERE departmentId = ?";
+    if (operator && operator.departmentId) {
+      db.query(sqlQuery, [operator.departmentId], async (error, result) => {
+        if (error) {
+          unlinkSync("./uploads/opertaor/" + req.fileName);
+          res.status(502).json({
             success: false,
-            error: check.errors,
+            error: "Internal Server Error",
           });
           return;
         }
-
-        operator.operatorId = generateId();
-        let originalPassword = operator.password;
-        const newPassword = await hashPassword(operator.password);
-        operator.password = newPassword;
-        let values = [
-          operator.operatorId,
-          operator.name,
-          operator.email,
-          operator.mobile,
-          operator.password,
-          operator.departmentId,
-          "Active",
-        ];
-        sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
-        db.query(
-          sqlQuery,
-          [operator.email, operator.mobile],
-          (error, result) => {
-            if (error) {
-              res.status(502).json({
-                success: false,
-                error: "Internal Server Error.",
-              });
-              return;
-            }
-            if (result.length == 0) {
-              sqlQuery =
-                "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
-              db.query(sqlQuery, [[values]], (error, result) => {
-                if (error) {
-                  res.status(502).json({
-                    success: false,
-                    error: "Internal Server Error.",
-                  });
-                  return;
-                } else {
-                  let sendOptions = {
-                    name: operator.name,
-                    email: operator.email,
-                    password: originalPassword,
-                    role: "Operator",
-                  };
-                  sendEmail(sendOptions);
-                  res.status(200).json({
-                    success: true,
-                    data: "Operator created successfully.",
-                  });
-                }
-              });
-            } else {
-              res.status(409).json({
-                success: false,
-                error:
-                  "Operator is already present on system with this mobile number or email.",
-              });
-            }
+        if (result.length == 0) {
+          unlinkSync("./uploads/operator/" + req.fileName);
+          res.status(502).json({
+            success: false,
+            error: "Something went wrong. Please try again.",
+          });
+          return;
+        } else {
+          const check = checkUserData(operator);
+          if (!check.result) {
+            unlinkSync("./uploads/operator/" + req.fileName);
+            res.status(400).json({
+              success: false,
+              error: check.errors,
+            });
+            return;
           }
-        );
-      }
-    });
-  }
+
+          operator.operatorId = generateId();
+          let originalPassword = operator.password;
+          const newPassword = await hashPassword(operator.password);
+          operator.password = newPassword;
+          let values = [
+            operator.operatorId,
+            operator.name,
+            operator.email,
+            operator.mobile,
+            operator.password,
+            operator.departmentId,
+            "Active",
+          ];
+          sqlQuery = "SELECT * FROM operator WHERE email = ? OR mobile = ?";
+          db.query(
+            sqlQuery,
+            [operator.email, operator.mobile],
+            (error, result) => {
+              if (error) {
+                unlinkSync("./uploads/operator/" + req.fileName);
+                res.status(502).json({
+                  success: false,
+                  error: "Internal Server Error.",
+                });
+                return;
+              }
+              if (result.length == 0) {
+                sharp("./uploads/operator/" + req.fileName)
+                  .toFormat("jpeg")
+                  .toFile(
+                    "./uploads/operator/" + operator.operatorId + ".jpeg",
+                    (err, info) => {
+                      sqlQuery =
+                        "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
+                      db.query(sqlQuery, [[values]], (error, result) => {
+                        if (error) {
+                          unlinkSync("./uploads/operator/" + req.fileName);
+                          res.status(502).json({
+                            success: false,
+                            error: "Internal Server Error.",
+                          });
+                          return;
+                        } else {
+                          let sendOptions = {
+                            name: operator.name,
+                            email: operator.email,
+                            password: originalPassword,
+                            role: "Operator",
+                          };
+                          sendEmail(sendOptions);
+                          res.status(200).json({
+                            success: true,
+                            data: "Operator created successfully.",
+                          });
+                        }
+                      });
+                    }
+                  );
+              } else {
+                unlinkSync("./uploads/operator/" + req.fileName);
+                res.status(409).json({
+                  success: false,
+                  error:
+                    "Operator is already present on system with this mobile number or email.",
+                });
+              }
+            }
+          );
+        }
+      });
+    }
+  });
 };
 
 // delete an operator
@@ -1026,80 +1217,164 @@ module.exports.activateManager = async (req, res) => {
   }
 };
 
+module.exports.createNewProject = async (req, res) => {
+  upload(req, res, async () => {
+    const projectName = req.body.projectName;
+    const projectId = generateId();
+    let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
+    db.query(sqlQuery, [projectName], (err, result) => {
+      if (err) {
+        unlinkSync("./uploads/project/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      }
+      if (result.length == 0) {
+        if (projectName.length >= 3) {
+          sharp("./uploads/project/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
+              if (err) {
+                unlinkSync("./uploads/project/" + req.fileName);
+                console.log(1, err);
+                res.status(502).json({
+                  success: false,
+                  error: toString(err),
+                });
+                return;
+              } else {
+                unlinkSync("./uploads/project/" + req.fileName);
+                sqlQuery =
+                  "INSERT INTO project (projectId, projectName) VALUES ?";
+                db.query(
+                  sqlQuery,
+                  [[[projectId, projectName]]],
+                  (err, result) => {
+                    if (err) {
+                      console.log(2, err);
+                      unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                      res.status(502).json({
+                        success: false,
+                        error: toString(err),
+                      });
+                      return;
+                    }
+                    res.status(200).json({
+                      success: true,
+                      data: "Project Added Successfully.",
+                    });
+                  }
+                );
+              }
+            });
+        } else {
+          unlinkSync("./uploads/project/" + req.fileName);
+          res.status(400).json({
+            success: false,
+            error: "Project Name should be atleast 3 characters long.",
+          });
+        }
+      } else {
+        unlinkSync("./uploads/project/" + req.fileName);
+        res.status(403).json({
+          success: false,
+          error: "Project Already Exists in system with same name.",
+        });
+      }
+    });
+  });
+};
+
 // creating new Client
 module.exports.createNewClient = async (req, res) => {
-  let client = req.body;
-  const check = checkUserData(client);
-  if (!client.organization) {
-    check.result = false;
-    check.errors.organization = "Please enter organization name.";
-  } else {
-    if (client.organization.length < 3) {
+  uploadToClient(req, res, async () => {
+    let client = req.body;
+    const check = checkUserData(client);
+    if (!client.organization) {
       check.result = false;
-      check.errors.organization =
-        "Organization name should contain atleast 3 characters.";
+      check.errors.organization = "Please enter organization name.";
+    } else {
+      if (client.organization.length < 3) {
+        check.result = false;
+        check.errors.organization =
+          "Organization name should contain atleast 3 characters.";
+      }
     }
-  }
-  if (!check.result) {
-    res.status(400).json({
-      success: false,
-      error: check.errors,
-    });
-    return;
-  }
+    if (!check.result) {
+      unlinkSync("./uploads/client/" + req.fileName);
 
-  client.clientId = generateId();
-  let originalPassword = client.password;
-  const newPassword = await hashPassword(client.password);
-  client.password = newPassword;
-  let values = [
-    client.clientId,
-    client.name,
-    client.email,
-    client.mobile,
-    client.organization,
-    client.password,
-  ];
-  let sqlQuery = "SELECT * FROM client where email = ? OR mobile = ?";
-  db.query(sqlQuery, [client.email, client.mobile], (error, result) => {
-    if (error) {
-      res.status(502).json({
+      res.status(400).json({
         success: false,
-        error: "Internal Server Error.",
+        error: check.errors,
       });
       return;
     }
-    if (result.length == 0) {
-      sqlQuery =
-        "INSERT INTO client (clientId, name, email, mobile, organization, password) VALUES ?";
-      db.query(sqlQuery, [[values]], (error, result) => {
-        if (error) {
-          res.status(502).json({
-            success: false,
-            error: "Internal Server Error.",
-          });
-          return;
-        } else {
-          let sendOptions = {
-            name: client.name,
-            email: client.email,
-            password: originalPassword,
-            role: "Client",
-          };
-          sendEmail(sendOptions);
-          res.status(200).json({
-            success: true,
-            data: "Client created successfully.",
-          });
-        }
-      });
-    } else {
-      res.status(409).json({
-        success: false,
-        error:
-          "Client is already present on system with this mobile number or email.",
-      });
-    }
+
+    client.clientId = generateId();
+    let originalPassword = client.password;
+    const newPassword = await hashPassword(client.password);
+    client.password = newPassword;
+    let values = [
+      client.clientId,
+      client.name,
+      client.email,
+      client.mobile,
+      client.organization,
+      client.password,
+    ];
+    let sqlQuery = "SELECT * FROM client where email = ? OR mobile = ?";
+    db.query(sqlQuery, [client.email, client.mobile], (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/client/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      }
+      if (result.length == 0) {
+        sharp("./uploads/client/" + req.fileName)
+          .toFormat("jpeg")
+          .toFile(
+            "./uploads/client/" + client.clientId + ".jpeg",
+            (err, info) => {
+              sqlQuery =
+                "INSERT INTO client (clientId, name, email, mobile, organization, password) VALUES ?";
+              db.query(sqlQuery, [[values]], (error, result) => {
+                if (error) {
+                  unlinkSync("./uploads/client/" + req.fileName);
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                } else {
+                  let sendOptions = {
+                    name: client.name,
+                    email: client.email,
+                    password: originalPassword,
+                    role: "Client",
+                  };
+                  sendEmail(sendOptions);
+                  res.status(200).json({
+                    success: true,
+                    data: "Client created successfully.",
+                  });
+                }
+              });
+            }
+          );
+      } else {
+        unlinkSync("./uploads/client/" + req.fileName);
+        res.status(409).json({
+          success: false,
+          error:
+            "Client is already present on system with this mobile number or email.",
+        });
+      }
+    });
   });
 };
 
