@@ -114,7 +114,7 @@ adminRouter.get(
 
 adminRouter.post("/editManager/:managerId", requireAdminAuth, editManager);
 adminRouter.post("/editClient/:clientId", requireAdminAuth, editClient);
-adminRouter.post("editOperator/:operatorId", requireAdminAuth, editOperator);
+adminRouter.post("/editOperator/:operatorId", requireAdminAuth, editOperator);
 
 //admin Routes for departments
 adminRouter.post("/addDepartment", requireAdminAuth, addDepartment);

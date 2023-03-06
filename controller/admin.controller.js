@@ -9,7 +9,6 @@ const { sendEmail } = require("../utility/sendEmail");
 const multer = require("multer");
 const path = require("path");
 const sharp = require("sharp");
-const { assert } = require("console");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -268,7 +267,7 @@ module.exports.editClient = async (req, res) => {
 
 module.exports.editProject = async (req, res) => {
   upload(req, res, async () => {
-    const projectId = req.params;
+    const projectId = req.params.projectId;
     const projectName = req.body.projectName;
     let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
     db.query(sqlQuery, [projectName], (err, result) => {
@@ -290,44 +289,58 @@ module.exports.editProject = async (req, res) => {
             });
             return;
           }
-          sharp("./uploads/project/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
-              if (err) {
-                unlinkSync("./uploads/project/" + req.fileName);
-                console.log(1, err);
-                res.status(502).json({
-                  success: false,
-                  error: toString(err),
-                });
-                return;
-              } else {
-                unlinkSync("./uploads/project/" + req.fileName);
-                sqlQuery =
-                  "UPDATE project SET projectName = ? WHERE projectId = ?";
-                db.query(sqlQuery, [projectName, projectId], (err, result) => {
+          if (result.length == 1) {
+            sharp("./uploads/project/" + req.fileName)
+              .toFormat("jpeg")
+              .toFile(
+                "./uploads/project/" + projectId + ".jpeg",
+                (err, info) => {
                   if (err) {
-                    console.log(2, err);
-                    unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                    unlinkSync("./uploads/project/" + req.fileName);
+                    console.log(1, err);
                     res.status(502).json({
                       success: false,
                       error: toString(err),
                     });
                     return;
+                  } else {
+                    unlinkSync("./uploads/project/" + req.fileName);
+                    sqlQuery =
+                      "UPDATE project SET projectName = ? WHERE projectId = ?";
+                    db.query(
+                      sqlQuery,
+                      [projectName, projectId],
+                      (err, result) => {
+                        if (err) {
+                          console.log(2, err);
+                          res.status(502).json({
+                            success: false,
+                            error: toString(err),
+                          });
+                          return;
+                        }
+                        res.status(200).json({
+                          success: true,
+                          data: "Project Edited Successfully.",
+                        });
+                      }
+                    );
                   }
-                  res.status(200).json({
-                    success: true,
-                    data: "Project Edited Successfully.",
-                  });
-                });
-              }
+                }
+              );
+          } else {
+            unlinkSync("./uploads/project/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: "Project doesnot exists",
             });
+          }
         });
       } else {
-        unlinkSync("./uploads/project/" + projectId + ".jpeg");
+        unlinkSync("./uploads/project/" + req.fileName);
         res.status(502).json({
           success: false,
-          data: "Project Name already exists",
+          eroor: "Project Name already exists",
         });
       }
     });
