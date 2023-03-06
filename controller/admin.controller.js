@@ -22,6 +22,226 @@ const upload = multer({
   }),
 }).single("projectIcon");
 
+const uploadTo = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/manager");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("managerIcon");
+
+const uploadToClient = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/client");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("clientIcon");
+
+const uploadToOperator = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/operator");
+    },
+    filename: function (req, file, cb) {
+      req.fileName = file.originalname;
+      cb(null, req.fileName);
+    },
+  }),
+}).single("operatorIcon");
+
+module.exports.editManager = async (req, res) => {
+  uploadTo(req, res, async () => {
+    const manager = req.body;
+    const managerId = req.params;
+    let sqlQuery = "SELECT * FROM manager WHERE managerId = ?";
+    db.query(sqlQuery, [managerId], async (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/manager/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      } else if (result.length == 1) {
+        let values = [];
+        if (manager.password) {
+          manager.password = await hashPassword(manager.password);
+          sqlQuery =
+            "UPDATE manager SET name = ? , email = ? , mobile = ? , password = ?";
+          values = [
+            manager.name,
+            manager.email,
+            manager.mobile,
+            manager.password,
+          ];
+        } else {
+          sqlQuery = "UPDATE manager SET name = ? , email = ? , mobile = ?";
+          values = [manager.name, manager.email, manager.mobile];
+        }
+        db.query(sqlQuery, values, (err, result) => {
+          if (err) {
+            unlinkSync("./uploads/manager/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
+          sharp("./uploads/manager/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile("./uploads/manager/" + managerId + ".jpeg", (err, info) => {
+              if (err) {
+                unlinkSync("./uploads/manager/" + req.fileName);
+                res.status(502).json({
+                  success: false,
+                  error: toString(err),
+                });
+                return;
+              } else {
+                unlinkSync("./uploads/manager/" + req.fileName);
+                res.status(200).json({
+                  success: true,
+                  data: "Manager Edited Successfully",
+                });
+              }
+            });
+        });
+      }
+    });
+  });
+};
+
+module.exports.editOperator = async (req, res) => {
+  uploadToOperator(req, res, async () => {
+    const operator = req.body;
+    const operatorId = req.params;
+    let sqlQuery = "SELECT * FROM operator WHERE operatorId = ?";
+    db.query(sqlQuery, [operatorId], async (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/operator/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      } else if (result.length == 1) {
+        let values = [];
+        if (operator.password) {
+          operator.password = await hashPassword(operator.password);
+          sqlQuery =
+            "UPDATE operator SET name = ? , email = ? , mobile = ? , password = ?";
+          values = [
+            operator.name,
+            operator.email,
+            operator.mobile,
+            operator.password,
+          ];
+        } else {
+          sqlQuery = "UPDATE operator SET name = ? , email = ? , mobile = ?";
+          values = [operator.name, operator.email, operator.mobile];
+        }
+        db.query(sqlQuery, values, (err, result) => {
+          if (err) {
+            unlinkSync("./uploads/operator/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
+          sharp("./uploads/operator/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile(
+              "./uploads/operator/" + operatorId + ".jpeg",
+              (err, info) => {
+                if (err) {
+                  unlinkSync("./uploads/operator/" + req.fileName);
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                } else {
+                  unlinkSync("./uploads/operator/" + req.fileName);
+                  res.status(200).json({
+                    success: true,
+                    data: "operator Edited Successfully",
+                  });
+                }
+              }
+            );
+        });
+      }
+    });
+  });
+};
+
+module.exports.editClient = async (req, res) => {
+  uploadToClient(req, res, async () => {
+    const client = req.body;
+    const clientId = req.params;
+    let sqlQuery = "SELECT * FROM client WHERE clientId = ?";
+    db.query(sqlQuery, [clientId], async (error, result) => {
+      if (error) {
+        unlinkSync("./uploads/client/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
+      } else if (result.length == 1) {
+        let values = [];
+        if (client.password) {
+          client.password = await hashPassword(client.password);
+          sqlQuery =
+            "UPDATE client SET name = ? , email = ? , mobile = ? , password = ?";
+          values = [client.name, client.email, client.mobile, client.password];
+        } else {
+          sqlQuery = "UPDATE client SET name = ? , email = ? , mobile = ?";
+          values = [client.name, client.email, client.mobile];
+        }
+        db.query(sqlQuery, values, (err, result) => {
+          if (err) {
+            unlinkSync("./uploads/client/" + req.fileName);
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
+          sharp("./uploads/client/" + req.fileName)
+            .toFormat("jpeg")
+            .toFile("./uploads/client/" + clientId + ".jpeg", (err, info) => {
+              if (err) {
+                unlinkSync("./uploads/client/" + req.fileName);
+                res.status(502).json({
+                  success: false,
+                  error: toString(err),
+                });
+                return;
+              } else {
+                unlinkSync("./uploads/client/" + req.fileName);
+                res.status(200).json({
+                  success: true,
+                  data: "client Edited Successfully",
+                });
+              }
+            });
+        });
+      }
+    });
+  });
+};
+
 module.exports.createNewProject = async (req, res) => {
   upload(req, res, async () => {
     const projectName = req.body.projectName;
@@ -30,6 +250,11 @@ module.exports.createNewProject = async (req, res) => {
     db.query(sqlQuery, [projectName], (err, result) => {
       if (err) {
         unlinkSync("./uploads/project/" + req.fileName);
+        res.status(502).json({
+          success: false,
+          error: toString(err),
+        });
+        return;
       }
       if (result.length == 0) {
         if (projectName.length >= 3) {
@@ -37,6 +262,7 @@ module.exports.createNewProject = async (req, res) => {
             .toFormat("jpeg")
             .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
               if (err) {
+                unlinkSync("./uploads/project/" + req.fileName);
                 console.log(1, err);
                 res.status(502).json({
                   success: false,

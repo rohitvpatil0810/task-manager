@@ -29,6 +29,9 @@ const {
   activateClient,
   getDeactivatedManagers,
   getDeactivatedClients,
+  editManager,
+  editClient,
+  editOperator,
 } = require("../../controller/admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
@@ -102,6 +105,12 @@ adminRouter.get(
   requireAdminAuth,
   getDeactivatedClients
 );
+
+//admin routes for editing users
+
+adminRouter.post("/editManager/:managerId", requireAdminAuth, editManager);
+adminRouter.post("editClient/:clientId" / requireAdminAuth, editClient);
+adminRouter.post("editOperator/:operatorId", requireAdminAuth, editOperator);
 
 // admin routes for login and logout
 adminRouter.get("/profile", requireAdminAuth, getAdminProfile);
