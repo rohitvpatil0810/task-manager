@@ -231,63 +231,90 @@ module.exports.editOperator = async (req, res) => {
 };
 
 module.exports.editClient = async (req, res) => {
+  console.log("Hell");
   uploadToClient(req, res, async () => {
+    console.log("Nothing");
     const client = req.body;
-    const clientId = req.params;
+    const clientId = req.params.clientId;
+    console.log(clientId);
     let sqlQuery = "SELECT * FROM client WHERE clientId = ?";
     db.query(sqlQuery, [clientId], async (error, result) => {
       if (error) {
-        unlinkSync("./uploads/client/" + req.fileName);
+        if (existsSync("./uploads/client/" + req.fileName)) {
+          unlinkSync("./uploads/client/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: toString(err),
         });
         return;
       } else if (result.length == 1) {
+        console.log("HMMM");
         let values = [];
         if (client.password) {
           client.password = await hashPassword(client.password);
           sqlQuery =
-            "UPDATE client SET name = ? , email = ? , mobile = ? , password = ? WHERE clientId = ?";
+            "UPDATE client SET name = ? , email = ? , mobile = ? , organization = ? , password = ? WHERE clientId = ?";
           values = [
             client.name,
             client.email,
             client.mobile,
+            client.organization,
             client.password,
             clientId,
           ];
         } else {
           sqlQuery =
-            "UPDATE client SET name = ? , email = ? , mobile = ? WHERE clientId = ?";
-          values = [client.name, client.email, client.mobile, clientId];
+            "UPDATE client SET name = ? , email = ? , mobile = ?, organization = ? WHERE clientId = ?";
+          values = [
+            client.name,
+            client.email,
+            client.mobile,
+            client.organization,
+            clientId,
+          ];
         }
         db.query(sqlQuery, values, (err, result) => {
           if (err) {
-            unlinkSync("./uploads/client/" + req.fileName);
+            if (existsSync("./uploads/client/" + req.fileName)) {
+              unlinkSync("./uploads/client/" + req.fileName);
+            }
             res.status(502).json({
               success: false,
               error: toString(err),
             });
             return;
           }
-          sharp("./uploads/client/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile("./uploads/client/" + clientId + ".jpeg", (err, info) => {
-              if (err) {
-                unlinkSync("./uploads/client/" + req.fileName);
-                res.status(502).json({
-                  success: false,
-                  error: toString(err),
-                });
-                return;
-              } else {
-                unlinkSync("./uploads/client/" + req.fileName);
-                res.status(200).json({
-                  success: true,
-                  data: "client Edited Successfully",
-                });
-              }
+          if (existsSync("./uploads/client/" + req.fileName)) {
+            sharp("./uploads/client/" + req.fileName)
+              .toFormat("jpeg")
+              .toFile("./uploads/client/" + clientId + ".jpeg", (err, info) => {
+                if (err) {
+                  unlinkSync("./uploads/client/" + req.fileName);
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                } else {
+                  unlinkSync("./uploads/client/" + req.fileName);
+                  res.status(200).json({
+                    success: true,
+                    data: "client Edited Successfully",
+                  });
+                }
+              });
+          } else {
+            res.status(200).json({
+              success: true,
+              data: "client Edited Successfully",
             });
+          }
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          error: "No client Found.",
         });
       }
     });
