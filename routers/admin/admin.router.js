@@ -38,27 +38,12 @@ const {
 const managerAdminContoller = require("../../controller/admin/manager.admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
+const projectAdminRouter = require("./project.admin.router");
 
 const adminRouter = Router();
 
 adminRouter.use("/reports", requireAdminAuth, reportsRouter);
-
-// project routes
-adminRouter.post("/addProject", requireAdminAuth, createNewProject);
-adminRouter.get("/deleteProject/:projectId", requireAdminAuth, deleteProject);
-adminRouter.get(
-  "/activateProject/:projectId",
-  requireAdminAuth,
-  activateProject
-);
-adminRouter.get("/getProjects", requireAdminAuth, getProjects);
-adminRouter.get(
-  "/getDeactivatedProjects",
-  requireAdminAuth,
-  getDeactivatedProjects
-);
-adminRouter.get("/getProjectIcon/:projectId", getProjectIcon);
-adminRouter.post("/editProject/:projectId", requireAdminAuth, editProject);
+adminRouter.use(projectAdminRouter);
 
 // profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
