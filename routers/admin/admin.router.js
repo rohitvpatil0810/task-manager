@@ -38,12 +38,14 @@ const {
 const managerAdminContoller = require("../../controller/admin/manager.admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
+const operatorAdminRouter = require("./operator.admin.router");
 const projectAdminRouter = require("./project.admin.router");
 
 const adminRouter = Router();
 
 adminRouter.use("/reports", requireAdminAuth, reportsRouter);
 adminRouter.use(projectAdminRouter);
+adminRouter.use(operatorAdminRouter);
 
 // profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
@@ -51,7 +53,6 @@ adminRouter.get(
   "/getManagerProfilePic/:managerId",
   managerAdminContoller.getManagerProfilePic
 );
-adminRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 
 // adding and deleting users routes
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
@@ -62,28 +63,13 @@ adminRouter.get(
   requireAdminAuth,
   activateManager
 );
-adminRouter.post("/addOperator", requireAdminAuth, createNewOperator);
-adminRouter.get(
-  "/deleteOperator/:operatorId",
-  requireAdminAuth,
-  deleteOperator
-);
-adminRouter.get(
-  "/activateOperator/:operatorId",
-  requireAdminAuth,
-  activateOperator
-);
+
 adminRouter.post("/addClient", requireAdminAuth, createNewClient);
 adminRouter.get("/deleteClient/:clientId", requireAdminAuth, deleteClient);
 adminRouter.get("/activateClient/:clientId", requireAdminAuth, activateClient);
 
 //  list of active and deleted users routes
-adminRouter.get("/getOperators", requireAdminAuth, getOperators);
-adminRouter.get(
-  "/getDeactivatedOperators",
-  requireAdminAuth,
-  getDeactivatedOperators
-);
+
 adminRouter.get("/getDepartments", requireAdminAuth, getDepartments);
 adminRouter.get("/getManagers", requireAdminAuth, getManagers);
 adminRouter.get(
@@ -102,7 +88,6 @@ adminRouter.get(
 
 adminRouter.post("/editManager/:managerId", requireAdminAuth, editManager);
 adminRouter.post("/editClient/:clientId", requireAdminAuth, editClient);
-adminRouter.post("/editOperator/:operatorId", requireAdminAuth, editOperator);
 
 //admin Routes for departments
 adminRouter.post("/addDepartment", requireAdminAuth, addDepartment);
