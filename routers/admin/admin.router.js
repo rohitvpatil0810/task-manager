@@ -12,7 +12,6 @@ const {
   getOperators,
   getDepartments,
   getClientProfilePic,
-  getManagerProfilePic,
   getOperatorProfilePic,
   deleteOperator,
   createNewProject,
@@ -35,7 +34,8 @@ const {
   addDepartment,
   editProject,
   editDepartment,
-} = require("../../controller/admin.controller");
+} = require("../../controller/admin/admin.controller");
+const managerAdminContoller = require("../../controller/admin/manager.admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
 
@@ -62,7 +62,10 @@ adminRouter.post("/editProject/:projectId", requireAdminAuth, editProject);
 
 // profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
-adminRouter.get("/getManagerProfilePic/:managerId", getManagerProfilePic);
+adminRouter.get(
+  "/getManagerProfilePic/:managerId",
+  managerAdminContoller.getManagerProfilePic
+);
 adminRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
 
 // adding and deleting users routes
