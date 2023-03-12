@@ -2,6 +2,7 @@ const db = require("../../database/db");
 const { unlinkSync, existsSync } = require("fs");
 const sharp = require("sharp");
 const { uploadToProject } = require("../../middleware/multer.middleware");
+const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewProject = async (req, res) => {
   uploadToProject(req, res, async () => {
