@@ -46,23 +46,13 @@ const adminRouter = Router();
 adminRouter.use("/reports", requireAdminAuth, reportsRouter);
 adminRouter.use(projectAdminRouter);
 adminRouter.use(operatorAdminRouter);
+adminRouter.use(managerAdminContoller);
 
 // profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
-adminRouter.get(
-  "/getManagerProfilePic/:managerId",
-  managerAdminContoller.getManagerProfilePic
-);
 
 // adding and deleting users routes
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
-adminRouter.post("/addManager", requireAdminAuth, createNewManager);
-adminRouter.get("/deleteManager/:managerId", requireAdminAuth, deleteManager);
-adminRouter.get(
-  "/activateManager/:managerId",
-  requireAdminAuth,
-  activateManager
-);
 
 adminRouter.post("/addClient", requireAdminAuth, createNewClient);
 adminRouter.get("/deleteClient/:clientId", requireAdminAuth, deleteClient);
@@ -71,12 +61,7 @@ adminRouter.get("/activateClient/:clientId", requireAdminAuth, activateClient);
 //  list of active and deleted users routes
 
 adminRouter.get("/getDepartments", requireAdminAuth, getDepartments);
-adminRouter.get("/getManagers", requireAdminAuth, getManagers);
-adminRouter.get(
-  "/getDeactivatedManagers",
-  requireAdminAuth,
-  getDeactivatedManagers
-);
+
 adminRouter.get("/getClients", requireAdminAuth, getClients);
 adminRouter.get(
   "/getDeactivatedClients",
@@ -86,7 +71,6 @@ adminRouter.get(
 
 //admin routes for editing users
 
-adminRouter.post("/editManager/:managerId", requireAdminAuth, editManager);
 adminRouter.post("/editClient/:clientId", requireAdminAuth, editClient);
 
 //admin Routes for departments
