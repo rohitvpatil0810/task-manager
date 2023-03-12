@@ -35,9 +35,9 @@ const {
   editProject,
   editDepartment,
 } = require("../../controller/admin/admin.controller");
-const managerAdminContoller = require("../../controller/admin/manager.admin.controller");
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
+const managerAdminRouter = require("./manager.admin.router");
 const operatorAdminRouter = require("./operator.admin.router");
 const projectAdminRouter = require("./project.admin.router");
 
@@ -46,40 +46,22 @@ const adminRouter = Router();
 adminRouter.use("/reports", requireAdminAuth, reportsRouter);
 adminRouter.use(projectAdminRouter);
 adminRouter.use(operatorAdminRouter);
-adminRouter.use(managerAdminContoller);
+adminRouter.use(managerAdminRouter);
 
-// profile images routes
 adminRouter.get("/getClientProfilePic/:clientId", getClientProfilePic);
 
-// adding and deleting users routes
 adminRouter.post("/addAdmin", requireAdminAuth, createNewAdmin);
 
 adminRouter.post("/addClient", requireAdminAuth, createNewClient);
 adminRouter.get("/deleteClient/:clientId", requireAdminAuth, deleteClient);
 adminRouter.get("/activateClient/:clientId", requireAdminAuth, activateClient);
-
-//  list of active and deleted users routes
-
-adminRouter.get("/getDepartments", requireAdminAuth, getDepartments);
-
 adminRouter.get("/getClients", requireAdminAuth, getClients);
 adminRouter.get(
   "/getDeactivatedClients",
   requireAdminAuth,
   getDeactivatedClients
 );
-
-//admin routes for editing users
-
 adminRouter.post("/editClient/:clientId", requireAdminAuth, editClient);
-
-//admin Routes for departments
-adminRouter.post("/addDepartment", requireAdminAuth, addDepartment);
-adminRouter.post(
-  "/editDepartment/:departmentId",
-  requireAdminAuth,
-  editDepartment
-);
 
 // admin routes for login and logout
 adminRouter.get("/profile", requireAdminAuth, getAdminProfile);
