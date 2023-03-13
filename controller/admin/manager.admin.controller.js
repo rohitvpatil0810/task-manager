@@ -8,6 +8,29 @@ const { generateId } = require("../../utility/idGenerator");
 const { hashPassword } = require("../../utility/passwordManager");
 
 module.exports.createNewManager = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['managerIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToManager(req, res, async () => {
     let manager = req.body;
     const check = checkUserData(manager);
@@ -208,6 +231,29 @@ module.exports.getManagerProfilePic = async (req, res) => {
 };
 
 module.exports.editManager = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['managerIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToManager(req, res, async () => {
     const manager = req.body;
     const managerId = req.params.managerId;

@@ -8,6 +8,33 @@ const { sendEmail } = require("../../utility/sendEmail");
 const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewClient = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['clientIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['organization'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToClient(req, res, async () => {
     let client = req.body;
     const check = checkUserData(client);
@@ -220,9 +247,34 @@ module.exports.getClientProfilePic = async (req, res) => {
 };
 
 module.exports.editClient = async (req, res) => {
-  console.log("Hell");
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['clientIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['organization'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToClient(req, res, async () => {
-    console.log("Nothing");
     const client = req.body;
     const clientId = req.params.clientId;
     console.log(clientId);

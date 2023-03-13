@@ -5,6 +5,17 @@ const { uploadToDepartment } = require("../../middleware/multer.middleware");
 const { generateId } = require("../../utility/idGenerator");
 
 module.exports.addDepartment = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['departmentIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['departmentName'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToDepartment(req, res, async () => {
     const departmentName = req.body.departmentName;
     const departmentId = generateId();
@@ -94,6 +105,18 @@ module.exports.addDepartment = async (req, res) => {
 };
 
 module.exports.editDepartment = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['departmentIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['departmentName'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
+
   uploadToDepartment(req, res, async () => {
     const departmentId = req.params.departmentId;
     const departmentName = req.body.departmentName;

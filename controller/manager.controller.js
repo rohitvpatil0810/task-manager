@@ -9,45 +9,20 @@ const multer = require("multer");
 const { existsSync, unlinkSync } = require("fs");
 const sharp = require("sharp");
 const { sendEmail } = require("../utility/sendEmail");
-
-const upload_departmentIcon = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/department");
-    },
-    filename: function (req, file, cb) {
-      req.fileName = file.originalname;
-      cb(null, req.fileName);
-    },
-  }),
-}).single("departmentIcon");
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/manager");
-    },
-    filename: function (req, file, cb) {
-      req.fileName = req.manager.managerId + path.extname(file.originalname);
-      cb(null, req.fileName);
-    },
-  }),
-}).single("profilePic");
-
-const uploadToOperator = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/operator");
-    },
-    filename: function (req, file, cb) {
-      req.fileName = req.manager.managerId + path.extname(file.originalname);
-      cb(null, req.fileName);
-    },
-  }),
-}).single("operatorIcon");
+const {
+  uploadToManager,
+  uploadToDepartment,
+  uploadToOperator,
+} = require("../middleware/multer.middleware");
 
 module.exports.uploadProfilePic = async (req, res) => {
-  upload(req, res, async () => {
+  /*
+   #swagger.parameters['managerIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   */
+  uploadToManager(req, res, async () => {
     sharp("./uploads/manager/" + req.fileName)
       .toFormat("jpeg")
       .toFile(
@@ -181,7 +156,18 @@ module.exports.getManagerProfile = async (req, res) => {
 
 // Creating new Department
 module.exports.createNewDepartment = async (req, res) => {
-  upload_departmentIcon(req, res, async () => {
+  /*
+  #swagger.autoBody = false
+   #swagger.parameters['departmentIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
+  uploadToDepartment(req, res, async () => {
     const department = req.body;
     if (!department.name) {
       res.status(400).json({
@@ -250,6 +236,33 @@ module.exports.createNewDepartment = async (req, res) => {
 
 // Creating new Operator/Resource
 module.exports.createNewOperator = async (req, res) => {
+  /*
+   #swagger.autoBody = false
+   #swagger.parameters['operatorIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['departmentId'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToOperator(req, res, async () => {
     let operator = req.body;
     if (operator && !operator.departmentId) {

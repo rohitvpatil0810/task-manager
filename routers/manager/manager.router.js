@@ -1,10 +1,14 @@
 const { Router } = require("express");
 const {
-  getOperatorProfilePic,
   getClientProfilePic,
-  editOperator,
+} = require("../../controller/admin/client.admin.controller");
+const {
   editDepartment,
-} = require("../../controller/admin.controller");
+} = require("../../controller/admin/department.admin.controller");
+const {
+  getOperatorProfilePic,
+  editOperator,
+} = require("../../controller/admin/operator.admin.controller");
 const {
   loginManager,
   logoutManager,

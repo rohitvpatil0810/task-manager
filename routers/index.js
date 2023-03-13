@@ -5,13 +5,30 @@ const clientRouter = require("./client/client.router");
 const managerRouter = require("./manager/manager.router");
 const operatorRouter = require("./operator/operator.router");
 const jwt = require("jsonwebtoken");
-
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("../swagger_output.json");
 const router = Router();
 
-router.use("/admin", adminRouter);
-router.use("/manager", managerRouter);
-router.use("/client", clientRouter);
-router.use("/operator", operatorRouter);
+router.use(
+  "/admin",
+  // #swagger.tags = ['Admin']
+  adminRouter
+);
+router.use(
+  "/manager",
+  // #swagger.tags = ['Manager']
+  managerRouter
+);
+router.use(
+  "/client",
+  // #swagger.tags = ['Client']
+  clientRouter
+);
+router.use(
+  "/operator",
+  // #swagger.tags = ['Operator']
+  operatorRouter
+);
 
 router.post("/getAuth", (req, res) => {
   let { token, userType } = req.body;
@@ -69,5 +86,7 @@ router.get("/", (req, res) => {
     data: "Welcome to backend of Task Manager.",
   });
 });
+
+router.use("/doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 module.exports = router;

@@ -8,6 +8,33 @@ const { sendEmail } = require("../../utility/sendEmail");
 const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewOperator = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['operatorIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['departementId'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToOperator(req, res, async () => {
     let operator = req.body;
     if (operator && !operator.departmentId) {
@@ -217,6 +244,33 @@ module.exports.getOperators = async (req, res) => {
 };
 
 module.exports.editOperator = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['operatorIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['name'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['email'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['mobile'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   #swagger.parameters['password'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+    #swagger.parameters['departementId'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToOperator(req, res, async () => {
     const operator = req.body;
     const operatorId = req.params.operatorId;

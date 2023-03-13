@@ -2,25 +2,18 @@ const { createToken } = require("../utility/createJWToken");
 const { checkPassword } = require("../utility/passwordManager");
 const db = require("../database/db");
 const maxAge = 3 * 24 * 60 * 60;
-const path = require("path");
-const multer = require("multer");
 const { existsSync, unlinkSync } = require("fs");
 const sharp = require("sharp");
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/operator");
-    },
-    filename: function (req, file, cb) {
-      req.fileName = req.operator.operatorId + path.extname(file.originalname);
-      cb(null, req.fileName);
-    },
-  }),
-}).single("profilePic");
+const { uploadToOperator } = require("../middleware/multer.middleware");
 
 module.exports.uploadProfilePic = async (req, res) => {
-  upload(req, res, async () => {
+  /*
+   #swagger.parameters['operatorIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   */
+  uploadToOperator(req, res, async () => {
     console.log(req.operator.operatorId);
     sharp("./uploads/operator/" + req.fileName)
       .toFormat("jpeg")

@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const {
-  getOperatorProfilePic,
   getManagerProfilePic,
-} = require("../../controller/admin.controller");
+} = require("../../controller/admin/manager.admin.controller");
+const {
+  getOperatorProfilePic,
+} = require("../../controller/admin/operator.admin.controller");
 const {
   loginClient,
   logoutClient,

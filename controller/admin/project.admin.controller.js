@@ -5,6 +5,17 @@ const { uploadToProject } = require("../../middleware/multer.middleware");
 const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewProject = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['projectIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['projectName'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   uploadToProject(req, res, async () => {
     const projectName = req.body.projectName;
     const projectId = generateId();
@@ -197,6 +208,17 @@ module.exports.deleteProject = async (req, res) => {
 };
 
 module.exports.editProject = async (req, res) => {
+  /*
+    #swagger.autoBody = false
+   #swagger.parameters['projectIcon'] ={
+      in: 'formData',
+      type: 'file'
+   } 
+   #swagger.parameters['projectName'] ={
+      in: 'formData',
+      type: 'text'
+   } 
+   */
   upload(req, res, async () => {
     const projectId = req.params.projectId;
     const projectName = req.body.projectName;

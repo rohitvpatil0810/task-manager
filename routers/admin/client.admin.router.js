@@ -6,7 +6,7 @@ const clientAdminRouter = Router();
 clientAdminRouter.post(
   "/addAdmin",
   requireAdminAuth,
-  clientAdminController.createNewAdmin
+  clientAdminController.createNewClient
 );
 clientAdminRouter.get(
   "/getClientProfilePic/:clientId",
