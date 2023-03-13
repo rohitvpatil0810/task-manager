@@ -9,7 +9,8 @@ const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewClient = async (req, res) => {
   /*
-    #swagger.autoBody = false
+   #swagger.consumes = ['multipart/form-data']  
+   #swagger.autoBody = false
    #swagger.parameters['clientIcon'] ={
       in: 'formData',
       type: 'file'
@@ -49,8 +50,9 @@ module.exports.createNewClient = async (req, res) => {
       }
     }
     if (!check.result) {
-      unlinkSync("./uploads/client/" + req.fileName);
-
+      if (existsSync("./uploads/client/" + req.fileName)) {
+        unlinkSync("./uploads/client/" + req.fileName);
+      }
       res.status(400).json({
         success: false,
         error: check.errors,
@@ -73,7 +75,9 @@ module.exports.createNewClient = async (req, res) => {
     let sqlQuery = "SELECT * FROM client where email = ? OR mobile = ?";
     db.query(sqlQuery, [client.email, client.mobile], (error, result) => {
       if (error) {
-        unlinkSync("./uploads/client/" + req.fileName);
+        if (existsSync("./uploads/client/" + req.fileName)) {
+          unlinkSync("./uploads/client/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: toString(err),
@@ -81,39 +85,60 @@ module.exports.createNewClient = async (req, res) => {
         return;
       }
       if (result.length == 0) {
-        sharp("./uploads/client/" + req.fileName)
-          .toFormat("jpeg")
-          .toFile(
-            "./uploads/client/" + client.clientId + ".jpeg",
-            (err, info) => {
-              sqlQuery =
-                "INSERT INTO client (clientId, name, email, mobile, organization, password) VALUES ?";
-              db.query(sqlQuery, [[values]], (error, result) => {
-                if (error) {
-                  unlinkSync("./uploads/client/" + req.fileName);
-                  res.status(502).json({
-                    success: false,
-                    error: toString(err),
-                  });
-                  return;
-                } else {
-                  let sendOptions = {
-                    name: client.name,
-                    email: client.email,
-                    password: originalPassword,
-                    role: "Client",
-                  };
-                  sendEmail(sendOptions);
-                  res.status(200).json({
-                    success: true,
-                    data: "Client created successfully.",
-                  });
-                }
+        sqlQuery =
+          "INSERT INTO client (clientId, name, email, mobile, organization, password) VALUES ?";
+        db.query(sqlQuery, [[values]], (error, result) => {
+          if (error) {
+            if (existsSync("./uploads/client/" + req.fileName)) {
+              unlinkSync("./uploads/client/" + req.fileName);
+            }
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          } else {
+            let sendOptions = {
+              name: client.name,
+              email: client.email,
+              password: originalPassword,
+              role: "Client",
+            };
+
+            sendEmail(sendOptions);
+            if (existsSync("./uploads/client/" + req.fileName)) {
+              sharp("./uploads/client/" + req.fileName)
+                .toFormat("jpeg")
+                .toFile(
+                  "./uploads/client/" + client.clientId + ".jpeg",
+                  (err, info) => {
+                    if (err) {
+                      if (existsSync("./uploads/client/" + req.fileName)) {
+                        unlinkSync("./uploads/client/" + req.fileName);
+                      }
+                      res.status(502).json({
+                        success: false,
+                        error: toString(err),
+                      });
+                    }
+                    res.status(200).json({
+                      success: true,
+                      data: "Client created successfully.",
+                    });
+                  }
+                );
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Client created successfully.",
               });
             }
-          );
+          }
+        });
       } else {
-        unlinkSync("./uploads/client/" + req.fileName);
+        if (existsSync("./uploads/client/" + req.fileName)) {
+          unlinkSync("./uploads/client/" + req.fileName);
+        }
         res.status(409).json({
           success: false,
           error:
@@ -248,6 +273,7 @@ module.exports.getClientProfilePic = async (req, res) => {
 
 module.exports.editClient = async (req, res) => {
   /*
+   #swagger.consumes = ['multipart/form-data']  
     #swagger.autoBody = false
    #swagger.parameters['clientIcon'] ={
       in: 'formData',
@@ -290,7 +316,6 @@ module.exports.editClient = async (req, res) => {
         });
         return;
       } else if (result.length == 1) {
-        console.log("HMMM");
         let values = [];
         if (client.password) {
           client.password = await hashPassword(client.password);
