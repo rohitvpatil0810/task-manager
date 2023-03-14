@@ -4,17 +4,17 @@ const {
 } = require("../../controller/admin/client.admin.controller");
 const {
   editDepartment,
+  addDepartment,
 } = require("../../controller/admin/department.admin.controller");
 const {
   getOperatorProfilePic,
   editOperator,
+  createNewOperator,
 } = require("../../controller/admin/operator.admin.controller");
 const {
   loginManager,
   logoutManager,
   getManagerProfile,
-  createNewDepartment,
-  createNewOperator,
   assignTask,
   assignedTask,
   notAssignedTask,
@@ -57,7 +57,7 @@ managerRouter.get("/getProjectIcon/:projectId", getProjectIcon);
 
 managerRouter.post("/profilePic", requireManagerAuth, uploadProfilePic);
 managerRouter.get("/profilePic", requireManagerAuth, getProfilePic);
-managerRouter.post("/addDepartment", requireManagerAuth, createNewDepartment);
+managerRouter.post("/addDepartment", requireManagerAuth, addDepartment);
 managerRouter.post("/addOperator", requireManagerAuth, createNewOperator);
 managerRouter.get(
   "/deleteOperator/:operatorId",
@@ -96,7 +96,7 @@ managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
 managerRouter.get("/completedTask", requireManagerAuth, completedTask);
 
-managerRouter.post("/editOpertor", requireManagerAuth, editOperator);
+managerRouter.post("/editOpertor", requireManagerAuth, edi);
 
 managerRouter.get(
   "/getTimeline/:taskId",
