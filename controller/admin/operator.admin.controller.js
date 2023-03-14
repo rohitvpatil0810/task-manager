@@ -9,6 +9,7 @@ const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewOperator = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data']
     #swagger.autoBody = false
    #swagger.parameters['operatorIcon'] ={
       in: 'formData',
@@ -30,15 +31,19 @@ module.exports.createNewOperator = async (req, res) => {
       in: 'formData',
       type: 'text'
    } 
-   #swagger.parameters['departementId'] ={
+   #swagger.parameters['departmentId'] ={
       in: 'formData',
       type: 'text'
    } 
    */
   uploadToOperator(req, res, async () => {
     let operator = req.body;
+    console.log(operator);
+
     if (operator && !operator.departmentId) {
-      unlinkSync("./uploads/operator/" + req.fileName);
+      if (existsSync("./uploads/operator/" + req.fileName)) {
+        unlinkSync("./uploads/operator/" + req.fileName);
+      }
       res.status(502).json({
         success: false,
         error: "Something went wrong. Please try again.",
@@ -49,7 +54,9 @@ module.exports.createNewOperator = async (req, res) => {
     if (operator && operator.departmentId) {
       db.query(sqlQuery, [operator.departmentId], async (error, result) => {
         if (error) {
-          unlinkSync("./uploads/opertaor/" + req.fileName);
+          if (existsSync("./uploads/operator/" + req.fileName)) {
+            unlinkSync("./uploads/operator/" + req.fileName);
+          }
           res.status(502).json({
             success: false,
             error: "Internal Server Error",
@@ -57,7 +64,9 @@ module.exports.createNewOperator = async (req, res) => {
           return;
         }
         if (result.length == 0) {
-          unlinkSync("./uploads/operator/" + req.fileName);
+          if (existsSync("./uploads/operator/" + req.fileName)) {
+            unlinkSync("./uploads/operator/" + req.fileName);
+          }
           res.status(502).json({
             success: false,
             error: "Something went wrong. Please try again.",
@@ -66,7 +75,9 @@ module.exports.createNewOperator = async (req, res) => {
         } else {
           const check = checkUserData(operator);
           if (!check.result) {
-            unlinkSync("./uploads/operator/" + req.fileName);
+            if (existsSync("./uploads/operator/" + req.fileName)) {
+              unlinkSync("./uploads/operator/" + req.fileName);
+            }
             res.status(400).json({
               success: false,
               error: check.errors,
@@ -93,7 +104,9 @@ module.exports.createNewOperator = async (req, res) => {
             [operator.email, operator.mobile],
             (error, result) => {
               if (error) {
-                unlinkSync("./uploads/operator/" + req.fileName);
+                if (existsSync("./uploads/operator/" + req.fileName)) {
+                  unlinkSync("./uploads/operator/" + req.fileName);
+                }
                 res.status(502).json({
                   success: false,
                   error: "Internal Server Error.",
@@ -101,39 +114,56 @@ module.exports.createNewOperator = async (req, res) => {
                 return;
               }
               if (result.length == 0) {
-                sharp("./uploads/operator/" + req.fileName)
-                  .toFormat("jpeg")
-                  .toFile(
-                    "./uploads/operator/" + operator.operatorId + ".jpeg",
-                    (err, info) => {
-                      sqlQuery =
-                        "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
-                      db.query(sqlQuery, [[values]], (error, result) => {
-                        if (error) {
-                          unlinkSync("./uploads/operator/" + req.fileName);
-                          res.status(502).json({
-                            success: false,
-                            error: "Internal Server Error.",
-                          });
-                          return;
-                        } else {
-                          let sendOptions = {
-                            name: operator.name,
-                            email: operator.email,
-                            password: originalPassword,
-                            role: "Operator",
-                          };
-                          sendEmail(sendOptions);
-                          res.status(200).json({
-                            success: true,
-                            data: "Operator created successfully.",
-                          });
-                        }
+                sqlQuery =
+                  "INSERT INTO operator (operatorId, name, email, mobile, password, departmentId, active) VALUES ?";
+                db.query(sqlQuery, [[values]], (error, result) => {
+                  if (error) {
+                    unlinkSync("./uploads/operator/" + req.fileName);
+                    res.status(502).json({
+                      success: false,
+                      error: "Internal Server Error.",
+                    });
+                    return;
+                  } else {
+                    let sendOptions = {
+                      name: operator.name,
+                      email: operator.email,
+                      password: originalPassword,
+                      role: "Operator",
+                    };
+                    sendEmail(sendOptions);
+                    if (existsSync("./uploads/operator/" + req.fileName)) {
+                      sharp("./uploads/operator/" + req.fileName)
+                        .toFormat("jpeg")
+                        .toFile(
+                          "./uploads/operator/" + operator.operatorId + ".jpeg",
+                          (err, info) => {
+                            if (err) {
+                              unlinkSync("./uploads/operator" + req.fileName);
+                              res.status(502).json({
+                                success: false,
+                                error:
+                                  "operator created but profile pic is not uploaded. Please Try Again.",
+                              });
+                            }
+                            res.status(200).json({
+                              success: true,
+                              data: "Operator created successfully.",
+                            });
+                          }
+                        );
+                    } else {
+                      res.status(200).json({
+                        success: true,
+                        data: "Operator created successfully.",
                       });
                     }
-                  );
+                  }
+                });
               } else {
-                unlinkSync("./uploads/operator/" + req.fileName);
+                if (existsSync("./uploads/operator/" + req.fileName)) {
+                  unlinkSync("./uploads/operator/" + req.fileName);
+                }
                 res.status(409).json({
                   success: false,
                   error:
@@ -245,6 +275,7 @@ module.exports.getOperators = async (req, res) => {
 
 module.exports.editOperator = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data']
     #swagger.autoBody = false
    #swagger.parameters['operatorIcon'] ={
       in: 'formData',
@@ -263,10 +294,6 @@ module.exports.editOperator = async (req, res) => {
       type: 'text'
    } 
    #swagger.parameters['password'] ={
-      in: 'formData',
-      type: 'text'
-   } 
-    #swagger.parameters['departementId'] ={
       in: 'formData',
       type: 'text'
    } 

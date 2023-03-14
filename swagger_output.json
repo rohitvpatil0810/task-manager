@@ -536,6 +536,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "operatorIcon",
@@ -563,7 +566,7 @@
             "type": "text"
           },
           {
-            "name": "departementId",
+            "name": "departmentId",
             "in": "formData",
             "type": "text"
           }
@@ -693,6 +696,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "operatorId",
@@ -722,11 +728,6 @@
           },
           {
             "name": "password",
-            "in": "formData",
-            "type": "text"
-          },
-          {
-            "name": "departementId",
             "in": "formData",
             "type": "text"
           }
@@ -2121,6 +2122,9 @@
           "Manager"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "operatorIcon",
@@ -2144,11 +2148,6 @@
           },
           {
             "name": "password",
-            "in": "formData",
-            "type": "text"
-          },
-          {
-            "name": "departementId",
             "in": "formData",
             "type": "text"
           }
