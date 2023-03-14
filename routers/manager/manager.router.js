@@ -120,4 +120,9 @@ managerRouter.post(
   requireManagerAuth,
   editDepartment
 );
+managerRouter.post(
+  "/editOperator/:opreatorId",
+  requireManagerAuth,
+  editOperator
+);
 module.exports = managerRouter;
