@@ -6,7 +6,8 @@ const { generateId } = require("../../utility/idGenerator");
 
 module.exports.addDepartment = async (req, res) => {
   /*
-    #swagger.autoBody = false
+  #swagger.consumes = ['multipart/form-data']  
+  #swagger.autoBody = false
    #swagger.parameters['departmentIcon'] ={
       in: 'formData',
       type: 'file'
@@ -33,55 +34,53 @@ module.exports.addDepartment = async (req, res) => {
       }
       if (result.length == 0) {
         if (departmentName.length >= 3) {
-          if (existsSync("./uploads/department/" + req.fileName)) {
-            unlinkSync("./uploads/department/" + req.fileName);
-            sharp("./uploads/department/" + req.fileName)
-              .toFormat("jpeg")
-              .toFile(
-                "./uploads/department/" + departmentId + ".jpeg",
-                (err, info) => {
-                  if (err) {
-                    unlinkSync("./uploads/project/" + req.fileName);
-                    console.log(1, err);
-                    res.status(502).json({
-                      success: false,
-                      error: toString(err),
-                    });
-                    return;
-                  } else {
-                    unlinkSync("./uploads/department/" + req.fileName);
-                    sqlQuery =
-                      "INSERT INTO department (departmentId, departmentName) VALUES ?";
-                    db.query(
-                      sqlQuery,
-                      [[[departmentId, departmentName]]],
-                      (err, result) => {
-                        if (err) {
-                          console.log(2, err);
-                          unlinkSync(
-                            "./uploads/department/" + departmentId + ".jpeg"
-                          );
-                          res.status(502).json({
-                            success: false,
-                            error: toString(err),
-                          });
-                          return;
-                        }
+          sqlQuery =
+            "INSERT INTO department (departmentId, departmentName) VALUES ?";
+          db.query(
+            sqlQuery,
+            [[[departmentId, departmentName]]],
+            (err, result) => {
+              if (err) {
+                if (existsSync("./uploads/department/" + req.fileName)) {
+                  unlinkSync("./uploads/department/" + req.fileName);
+                }
+                res.status(502).json({
+                  success: false,
+                  error: toString(err),
+                });
+                return;
+              }
+              if (existsSync("./uploads/department/" + req.fileName)) {
+                sharp("./uploads/department/" + req.fileName)
+                  .toFormat("jpeg")
+                  .toFile(
+                    "./uploads/department/" + departmentId + ".jpeg",
+                    (err, info) => {
+                      if (err) {
+                        unlinkSync("./uploads/project/" + req.fileName);
+                        console.log(1, err);
+                        res.status(502).json({
+                          success: false,
+                          error: toString(err),
+                        });
+                        return;
+                      } else {
+                        unlinkSync("./uploads/department/" + req.fileName);
                         res.status(200).json({
                           success: true,
                           data: "Department Added Successfully.",
                         });
                       }
-                    );
-                  }
-                }
-              );
-          } else {
-            res.status(200).json({
-              success: true,
-              data: "Department Added Successfully.",
-            });
-          }
+                    }
+                  );
+              } else {
+                res.status(200).json({
+                  success: true,
+                  data: "Department Added Successfully.",
+                });
+              }
+            }
+          );
         } else {
           if (existsSync("./uploads/department/" + req.fileName)) {
             unlinkSync("./uploads/department/" + req.fileName);
@@ -106,6 +105,7 @@ module.exports.addDepartment = async (req, res) => {
 
 module.exports.editDepartment = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data']  
     #swagger.autoBody = false
    #swagger.parameters['departmentIcon'] ={
       in: 'formData',
@@ -155,6 +155,29 @@ module.exports.editDepartment = async (req, res) => {
               });
               return;
             }
+            sqlQuery =
+              "UPDATE department SET departmentName = ? WHERE departmentId = ?";
+            db.query(
+              sqlQuery,
+              [departmentName, departmentId],
+              (err, result) => {
+                if (err) {
+                  console.log(2, err);
+                  if (existsSync("./uploads/department/" + req.fileName)) {
+                    unlinkSync("./uploads/department/" + req.fileName);
+                  }
+                  res.status(502).json({
+                    success: false,
+                    error: toString(err),
+                  });
+                  return;
+                }
+                res.status(200).json({
+                  success: true,
+                  data: "department Edited Successfully.",
+                });
+              }
+            );
             if (existsSync("./uploads/department/" + req.fileName)) {
               sharp("./uploads/department/" + req.fileName)
                 .toFormat("jpeg")
@@ -169,32 +192,12 @@ module.exports.editDepartment = async (req, res) => {
                         error: toString(err),
                       });
                       return;
-                    } else {
-                      unlinkSync("./uploads/department/" + req.fileName);
-                      sqlQuery =
-                        "UPDATE department SET departmentName = ? WHERE departmentId = ?";
-                      db.query(
-                        sqlQuery,
-                        [departmentName, departmentId],
-                        (err, result) => {
-                          if (err) {
-                            console.log(2, err);
-                            unlinkSync(
-                              "./uploads/department/" + departmentId + ".jpeg"
-                            );
-                            res.status(502).json({
-                              success: false,
-                              error: toString(err),
-                            });
-                            return;
-                          }
-                          res.status(200).json({
-                            success: true,
-                            data: "department Edited Successfully.",
-                          });
-                        }
-                      );
                     }
+                    unlinkSync("./uploads/department/" + req.fileName);
+                    res.status(200).json({
+                      success: true,
+                      data: "department Edited Successfully.",
+                    });
                   }
                 );
             } else {
