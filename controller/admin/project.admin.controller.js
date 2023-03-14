@@ -6,6 +6,7 @@ const { generateId } = require("../../utility/idGenerator");
 
 module.exports.createNewProject = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data']
     #swagger.autoBody = false
    #swagger.parameters['projectIcon'] ={
       in: 'formData',
@@ -22,7 +23,9 @@ module.exports.createNewProject = async (req, res) => {
     let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
     db.query(sqlQuery, [projectName], (err, result) => {
       if (err) {
-        unlinkSync("./uploads/project/" + req.fileName);
+        if (existsSync("./uploads/project/" + req.fileName)) {
+          unlinkSync("./uploads/project/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: toString(err),
@@ -31,51 +34,62 @@ module.exports.createNewProject = async (req, res) => {
       }
       if (result.length == 0) {
         if (projectName.length >= 3) {
-          sharp("./uploads/project/" + req.fileName)
-            .toFormat("jpeg")
-            .toFile("./uploads/project/" + projectId + ".jpeg", (err, info) => {
-              if (err) {
+          sqlQuery = "INSERT INTO project (projectId, projectName) VALUES ?";
+          db.query(sqlQuery, [[[projectId, projectName]]], (err, result) => {
+            if (err) {
+              console.log(2, err);
+              if (existsSync("./uploads/project/" + req.fileName)) {
                 unlinkSync("./uploads/project/" + req.fileName);
-                console.log(1, err);
-                res.status(502).json({
-                  success: false,
-                  error: toString(err),
-                });
-                return;
-              } else {
-                unlinkSync("./uploads/project/" + req.fileName);
-                sqlQuery =
-                  "INSERT INTO project (projectId, projectName) VALUES ?";
-                db.query(
-                  sqlQuery,
-                  [[[projectId, projectName]]],
-                  (err, result) => {
+              }
+              res.status(502).json({
+                success: false,
+                error: toString(err),
+              });
+              return;
+            }
+            if (existsSync("./uploads/project/" + req.fileName)) {
+              sharp("./uploads/project/" + req.fileName)
+                .toFormat("jpeg")
+                .toFile(
+                  "./uploads/project/" + projectId + ".jpeg",
+                  (err, info) => {
                     if (err) {
-                      console.log(2, err);
-                      unlinkSync("./uploads/project/" + projectId + ".jpeg");
+                      unlinkSync("./uploads/project/" + req.fileName);
+                      console.log(1, err);
                       res.status(502).json({
                         success: false,
                         error: toString(err),
                       });
                       return;
+                    } else {
+                      unlinkSync("./uploads/project/" + req.fileName);
+                      res.status(200).json({
+                        success: true,
+                        data: "Project Added Successfully.",
+                      });
                     }
-                    res.status(200).json({
-                      success: true,
-                      data: "Project Added Successfully.",
-                    });
                   }
                 );
-              }
-            });
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Project Added Successfully.",
+              });
+            }
+          });
         } else {
-          unlinkSync("./uploads/project/" + req.fileName);
+          if (existsSync("./uploads/project/" + req.fileName)) {
+            unlinkSync("./uploads/project/" + req.fileName);
+          }
           res.status(400).json({
             success: false,
             error: "Project Name should be atleast 3 characters long.",
           });
         }
       } else {
-        unlinkSync("./uploads/project/" + req.fileName);
+        if (existsSync("./uploads/project/" + req.fileName)) {
+          unlinkSync("./uploads/project/" + req.fileName);
+        }
         res.status(403).json({
           success: false,
           error: "Project Already Exists in system with same name.",
@@ -209,6 +223,7 @@ module.exports.deleteProject = async (req, res) => {
 
 module.exports.editProject = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data']
     #swagger.autoBody = false
    #swagger.parameters['projectIcon'] ={
       in: 'formData',
@@ -219,11 +234,12 @@ module.exports.editProject = async (req, res) => {
       type: 'text'
    } 
    */
-  upload(req, res, async () => {
+  uploadToProject(req, res, async () => {
     const projectId = req.params.projectId;
     const projectName = req.body.projectName;
-    let sqlQuery = "SELECT * FROM project WHERE projectName = ?";
-    db.query(sqlQuery, [projectName], (err, result) => {
+    let sqlQuery =
+      "SELECT * FROM project WHERE projectName = ? AND projectId != ?";
+    db.query(sqlQuery, [projectName, projectId], (err, result) => {
       if (err) {
         if (existsSync("./uploads/project/" + req.fileName)) {
           unlinkSync("./uploads/project/" + req.fileName);
@@ -235,26 +251,38 @@ module.exports.editProject = async (req, res) => {
         return;
       } else if (result.length == 0) {
         sqlQuery = "SELECT * FROM project WHERE projectId = ?";
-        if (projectName.length)
-          db.query(sqlQuery, [projectId], (err, result) => {
-            if (err) {
+        db.query(sqlQuery, [projectId], (err, result) => {
+          if (err) {
+            if (existsSync("./uploads/project/" + req.fileName)) {
+              unlinkSync("./uploads/project/" + req.fileName);
+            }
+            res.status(502).json({
+              success: false,
+              error: toString(err),
+            });
+            return;
+          }
+          if (result.length == 1) {
+            if (projectName.length < 3) {
               if (existsSync("./uploads/project/" + req.fileName)) {
                 unlinkSync("./uploads/project/" + req.fileName);
               }
               res.status(502).json({
                 success: false,
-                error: toString(err),
+                error: "Project Name should be atleast 3 characters long.",
               });
               return;
             }
-            if (result.length == 1) {
-              if (projectName.length < 3) {
+            sqlQuery = "UPDATE project SET projectName = ? WHERE projectId = ?";
+            db.query(sqlQuery, [projectName, projectId], (err, result) => {
+              if (err) {
                 if (existsSync("./uploads/project/" + req.fileName)) {
                   unlinkSync("./uploads/project/" + req.fileName);
                 }
+                console.log(2, err);
                 res.status(502).json({
                   success: false,
-                  error: "Project Name should be atleast 3 characters long.",
+                  error: toString(err),
                 });
                 return;
               }
@@ -274,26 +302,10 @@ module.exports.editProject = async (req, res) => {
                         return;
                       } else {
                         unlinkSync("./uploads/project/" + req.fileName);
-                        sqlQuery =
-                          "UPDATE project SET projectName = ? WHERE projectId = ?";
-                        db.query(
-                          sqlQuery,
-                          [projectName, projectId],
-                          (err, result) => {
-                            if (err) {
-                              console.log(2, err);
-                              res.status(502).json({
-                                success: false,
-                                error: toString(err),
-                              });
-                              return;
-                            }
-                            res.status(200).json({
-                              success: true,
-                              data: "Project Edited Successfully.",
-                            });
-                          }
-                        );
+                        res.status(200).json({
+                          success: true,
+                          data: "Project Edited Successfully.",
+                        });
                       }
                     }
                   );
@@ -303,16 +315,17 @@ module.exports.editProject = async (req, res) => {
                   data: "Project Edited Successfully.",
                 });
               }
-            } else {
-              if (existsSync("./uploads/project/" + req.fileName)) {
-                unlinkSync("./uploads/project/" + req.fileName);
-              }
-              res.status(502).json({
-                success: false,
-                error: "Project doesnot exists",
-              });
+            });
+          } else {
+            if (existsSync("./uploads/project/" + req.fileName)) {
+              unlinkSync("./uploads/project/" + req.fileName);
             }
-          });
+            res.status(502).json({
+              success: false,
+              error: "Project doesnot exists",
+            });
+          }
+        });
       } else {
         if (existsSync("./uploads/project/" + req.fileName)) {
           unlinkSync("./uploads/project/" + req.fileName);

@@ -308,6 +308,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "projectIcon",
@@ -472,6 +475,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "projectId",
