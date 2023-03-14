@@ -98,7 +98,11 @@ managerRouter.get("/notAssignedTask", requireManagerAuth, notAssignedTask);
 managerRouter.get("/inProgressTask", requireManagerAuth, inProgressTask);
 managerRouter.get("/completedTask", requireManagerAuth, completedTask);
 
-managerRouter.post("/editOpertor", requireManagerAuth, edi);
+managerRouter.post(
+  "/editOpertor/:operatorId",
+  requireManagerAuth,
+  editOperator
+);
 
 managerRouter.get(
   "/getTimeline/:taskId",
