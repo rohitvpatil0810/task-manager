@@ -120,8 +120,9 @@ module.exports.editDepartment = async (req, res) => {
   uploadToDepartment(req, res, async () => {
     const departmentId = req.params.departmentId;
     const departmentName = req.body.departmentName;
-    let sqlQuery = "SELECT * FROM department WHERE departmentName = ?";
-    db.query(sqlQuery, [departmentName], (err, result) => {
+    let sqlQuery =
+      "SELECT * FROM department WHERE departmentName = ? AND departmentId != ?";
+    db.query(sqlQuery, [departmentName, departmentId], (err, result) => {
       if (err) {
         if (existsSync("./uploads/department/" + req.fileName)) {
           unlinkSync("./uploads/department/" + req.fileName);
@@ -172,40 +173,36 @@ module.exports.editDepartment = async (req, res) => {
                   });
                   return;
                 }
-                res.status(200).json({
-                  success: true,
-                  data: "department Edited Successfully.",
-                });
+                if (existsSync("./uploads/department/" + req.fileName)) {
+                  sharp("./uploads/department/" + req.fileName)
+                    .toFormat("jpeg")
+                    .toFile(
+                      "./uploads/department/" + departmentId + ".jpeg",
+                      (err, info) => {
+                        if (err) {
+                          unlinkSync("./uploads/department/" + req.fileName);
+                          console.log(1, err);
+                          res.status(502).json({
+                            success: false,
+                            error: toString(err),
+                          });
+                          return;
+                        }
+                        unlinkSync("./uploads/department/" + req.fileName);
+                        res.status(200).json({
+                          success: true,
+                          data: "department Edited Successfully.",
+                        });
+                      }
+                    );
+                } else {
+                  res.status(200).json({
+                    success: true,
+                    data: "department Edited Successfully.",
+                  });
+                }
               }
             );
-            if (existsSync("./uploads/department/" + req.fileName)) {
-              sharp("./uploads/department/" + req.fileName)
-                .toFormat("jpeg")
-                .toFile(
-                  "./uploads/department/" + departmentId + ".jpeg",
-                  (err, info) => {
-                    if (err) {
-                      unlinkSync("./uploads/department/" + req.fileName);
-                      console.log(1, err);
-                      res.status(502).json({
-                        success: false,
-                        error: toString(err),
-                      });
-                      return;
-                    }
-                    unlinkSync("./uploads/department/" + req.fileName);
-                    res.status(200).json({
-                      success: true,
-                      data: "department Edited Successfully.",
-                    });
-                  }
-                );
-            } else {
-              res.status(200).json({
-                success: true,
-                data: "department Edited Successfully.",
-              });
-            }
           } else {
             if (existsSync("./uploads/department/" + req.fileName)) {
               unlinkSync("./uploads/department/" + req.fileName);

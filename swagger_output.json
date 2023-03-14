@@ -1228,6 +1228,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "clientId",
@@ -1275,6 +1278,112 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/admin/addDepartment": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "departmentIcon",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "departmentName",
+            "in": "formData",
+            "type": "text"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/admin/editDepartment/{departmentId}": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "departmentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "departmentIcon",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "departmentName",
+            "in": "formData",
+            "type": "text"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "502": {
+            "description": "Bad Gateway"
+          }
+        }
+      }
+    },
+    "/admin/getDepartments": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "502": {
             "description": "Bad Gateway"
@@ -2192,6 +2301,9 @@
           "Manager"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "departmentId",

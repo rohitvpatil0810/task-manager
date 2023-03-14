@@ -7,6 +7,7 @@ const {
 const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const reportsRouter = require("../reports/reports.router");
 const clientAdminRouter = require("./client.admin.router");
+const departmentAdminRouter = require("./department.admin.router");
 const managerAdminRouter = require("./manager.admin.router");
 const operatorAdminRouter = require("./operator.admin.router");
 const projectAdminRouter = require("./project.admin.router");
@@ -18,6 +19,7 @@ adminRouter.use(projectAdminRouter);
 adminRouter.use(operatorAdminRouter);
 adminRouter.use(managerAdminRouter);
 adminRouter.use(clientAdminRouter);
+adminRouter.use(departmentAdminRouter);
 
 // admin routes for login and logout
 adminRouter.get("/profile", requireAdminAuth, getAdminProfile);

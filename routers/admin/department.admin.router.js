@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const departmentAdminController = require("../../controller/admin/department.admin.controller");
+const { requireAdminAuth } = require("../../middleware/adminAuth.middleware");
 const departmentAdminRouter = Router();
 
 departmentAdminRouter.post(
