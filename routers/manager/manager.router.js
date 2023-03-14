@@ -5,6 +5,7 @@ const {
 const {
   editDepartment,
   addDepartment,
+  getDepartmentIcon,
 } = require("../../controller/admin/department.admin.controller");
 const {
   getOperatorProfilePic,
@@ -80,6 +81,7 @@ managerRouter.get(
   getOperatorByOperatorId
 );
 managerRouter.get("/getOperatorProfilePic/:operatorId", getOperatorProfilePic);
+managerRouter.get("/getDepartmentIcon/:departmentId", getDepartmentIcon);
 managerRouter.get(
   "/getClient/:clientId",
   requireManagerAuth,
