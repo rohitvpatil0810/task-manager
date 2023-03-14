@@ -14,6 +14,10 @@ departmentAdminRouter.post(
   departmentAdminController.editDepartment
 );
 departmentAdminRouter.get(
+  "/getDepartmentProfilePic/:departmentId",
+  departmentAdminController.getDepartmentIcon
+);
+departmentAdminRouter.get(
   "/getDepartments",
   requireAdminAuth,
   departmentAdminController.getDepartments

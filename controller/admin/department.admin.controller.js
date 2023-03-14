@@ -228,6 +228,18 @@ module.exports.editDepartment = async (req, res) => {
   });
 };
 
+module.exports.getDepartmentIcon = async (req, res) => {
+  let departmentId = req.params.departmentId;
+  if (existsSync("./uploads/department/" + departmentId + ".jpeg")) {
+    res.download("./uploads/department/" + departmentId + ".jpeg");
+  } else {
+    res.status(404).json({
+      success: false,
+      error: "No profile pic found",
+    });
+  }
+};
+
 module.exports.getDepartments = async (req, res) => {
   let sqlQuery = "SELECT * FROM department";
   db.query(sqlQuery, (error, result) => {
