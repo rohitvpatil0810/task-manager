@@ -9,6 +9,7 @@ const { hashPassword } = require("../../utility/passwordManager");
 
 module.exports.createNewManager = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data'] 
     #swagger.autoBody = false
    #swagger.parameters['managerIcon'] ={
       in: 'formData',
@@ -35,7 +36,9 @@ module.exports.createNewManager = async (req, res) => {
     let manager = req.body;
     const check = checkUserData(manager);
     if (!check.result) {
-      unlinkSync("./uploads/manager/" + req.fileName);
+      if (existsSync("./uploads/manager/" + req.fileName)) {
+        unlinkSync("./uploads/manager/" + req.fileName);
+      }
       res.status(400).json({
         success: false,
         error: check.errors,
@@ -57,7 +60,9 @@ module.exports.createNewManager = async (req, res) => {
     let sqlQuery = "SELECT * FROM manager where email = ? OR mobile = ?";
     db.query(sqlQuery, [manager.email, manager.mobile], (error, result) => {
       if (error) {
-        unlinkSync("./uploads/manager/" + req.fileName);
+        if (existsSync("./uploads/manager/" + req.fileName)) {
+          unlinkSync("./uploads/manager/" + req.fileName);
+        }
         res.status(502).json({
           success: false,
           error: "Internal Server Error.",
@@ -65,39 +70,58 @@ module.exports.createNewManager = async (req, res) => {
         return;
       }
       if (result.length == 0) {
-        sharp("./uploads/manager/" + req.fileName)
-          .toFormat("jpeg")
-          .toFile(
-            "./uploads/manager/" + manager.managerId + ".jpeg",
-            (err, info) => {
-              sqlQuery =
-                "INSERT INTO manager (managerId, name, email, mobile, password) VALUES ?";
-              db.query(sqlQuery, [[values]], (error, result) => {
-                if (error) {
-                  unlinkSync("./uploads/manager/" + req.fileName);
-                  res.status(502).json({
-                    success: false,
-                    error: "Internal Server Error.",
-                  });
-                  return;
-                } else {
-                  let sendOptions = {
-                    name: manager.name,
-                    email: manager.email,
-                    password: originalPassword,
-                    role: "Manager",
-                  };
-                  sendEmail(sendOptions);
-                  res.status(200).json({
-                    success: true,
-                    data: "Manager created successfully.",
-                  });
-                }
+        sqlQuery =
+          "INSERT INTO manager (managerId, name, email, mobile, password) VALUES ?";
+        db.query(sqlQuery, [[values]], (error, result) => {
+          if (error) {
+            if (existsSync("./uploads/manager/" + req.fileName)) {
+              unlinkSync("./uploads/manager/" + req.fileName);
+            }
+            res.status(502).json({
+              success: false,
+              error: "Internal Server Error.",
+            });
+            return;
+          } else {
+            let sendOptions = {
+              name: manager.name,
+              email: manager.email,
+              password: originalPassword,
+              role: "Manager",
+            };
+            sendEmail(sendOptions);
+            if (existsSync("./uploads/manager/" + req.fileName)) {
+              sharp("./uploads/manager/" + req.fileName)
+                .toFormat("jpeg")
+                .toFile(
+                  "./uploads/manager/" + manager.managerId + ".jpeg",
+                  (err, info) => {
+                    if (err) {
+                      unlinkSync("./uploads/manager/" + req.fileName);
+                      res.status(502).json({
+                        success: false,
+                        error: toString(err),
+                      });
+                    }
+                    unlinkSync("./uploads/manager/" + req.fileName);
+                    res.status(200).json({
+                      success: true,
+                      data: "Manager created successfully.",
+                    });
+                  }
+                );
+            } else {
+              res.status(200).json({
+                success: true,
+                data: "Manager created successfully.",
               });
             }
-          );
+          }
+        });
       } else {
-        unlinkSync("./uploads/manager/" + req.fileName);
+        if (existsSync("./uploads/manager/" + req.fileName)) {
+          unlinkSync("./uploads/manager/" + req.fileName);
+        }
         res.status(409).json({
           success: false,
           error:
@@ -232,6 +256,7 @@ module.exports.getManagerProfilePic = async (req, res) => {
 
 module.exports.editManager = async (req, res) => {
   /*
+  #swagger.consumes = ['multipart/form-data'] 
     #swagger.autoBody = false
    #swagger.parameters['managerIcon'] ={
       in: 'formData',

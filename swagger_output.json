@@ -777,6 +777,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "managerIcon",
@@ -929,6 +932,9 @@
           "Admin"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "managerId",
