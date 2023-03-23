@@ -17,7 +17,9 @@ const pool = mysql.createPool({
 });
 
 pool.getConnection((err) => {
-  if (err) throw err;
+  if (err) {
+    console.log(err);
+  }
   console.log("Connected to SQL database...");
 
   essentials.forEach((item) => {
