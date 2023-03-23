@@ -8,5 +8,5 @@ const hashPassword = async (password) => {
 
 console.log(uuid.v4());
 
-const test = async () => console.log(await hashPassword("test1234"));
+const test = async () => console.log(await hashPassword(""));
 test();

@@ -1,4 +1,3 @@
-let sqlQuery1 = "CREATE DATABASE IF NOT EXISTS TaskManager; ";
 let sqlQuery2 =
   "CREATE TABLE IF NOT EXISTS admin (id VARCHAR(255), name VARCHAR(255), email VARCHAR(255), mobile VARCHAR(255), password VARCHAR(255));";
 
@@ -29,7 +28,6 @@ let sqlQuery10 =
 let sqlQuery11 =
   "CREATE TABLE IF NOT EXISTS project (projectId VARCHAR(255) PRIMARY KEY, projectName VARCHAR(255), active enum ('Active', 'Deleted') DEFAULT 'Active')";
 module.exports = [
-  sqlQuery1,
   sqlQuery2,
   sqlQuery3,
   sqlQuery4,
